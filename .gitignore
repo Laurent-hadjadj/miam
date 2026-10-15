@@ -39,6 +39,15 @@ testem.log
 /typings
 __screenshots__/
 
+# Playwright (e2e)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# BFF (journal d'activité SQLite, état d'exécution local)
+/server/data/
+
 # System files
 .DS_Store
 Thumbs.db
@@ -48,3 +57,8 @@ Thumbs.db
 *.swp
 
 .gitconfig
+
+toolz/*
+
+# Configuration locale du module BFF (secrets) - voir .env.example
+.env

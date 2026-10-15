@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "totp-management-frontend": {
+    "miam": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -25,15 +25,14 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "@fontsource/roboto/latin-300.css",
+              "@fontsource/roboto/latin-400.css",
+              "@fontsource/roboto/latin-500.css",
+              "material-icons/iconfont/filled.css",
+              "src/styles.scss"
             ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
             "security": {
               "allowedHosts": []
-            },
-            "ssr": {
-              "entry": "src/server.ts"
             }
           },
           "configurations": {
@@ -41,7 +40,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "700kB",
                   "maximumError": "1MB"
                 },
                 {
@@ -50,7 +49,12 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": { "minify": true, "inlineCritical": false },
+                "fonts": false
+              }
             },
             "development": {
               "optimization": false,
@@ -62,18 +66,32 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.js"
+          },
           "configurations": {
             "production": {
-              "buildTarget": "totp-management-frontend:build:production"
+              "buildTarget": "miam:build:production"
             },
             "development": {
-              "buildTarget": "totp-management-frontend:build:development"
+              "buildTarget": "miam:build:development"
             }
           },
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "coverageThresholds": {
+              "statements": 85,
+              "branches": 85,
+              "functions": 85,
+              "lines": 85
+            },
+            "coverageExclude": [
+              "src/testing/**"
+            ]
+          }
         }
       }
     }
