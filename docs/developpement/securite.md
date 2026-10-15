@@ -44,7 +44,7 @@ _
 
 ## 3️⃣ Scan ZAP
 
-Scan dynamique OWASP ZAP (image `zaproxy/zap-stable`, scan actif complet avec AJAX spider) exécuté le 15/10/2026 sur le module BFF servant le build de production, avec la CSP actuelle (aucune origine tierce), la page publique `/informations` et le point de santé, périmètre non authentifié :
+Scan dynamique OWASP ZAP (image `zaproxy/zap-stable`, scan actif complet avec spider client) exécuté le 15/10/2026 sur le module BFF servant le build de production, avec la CSP actuelle (aucune origine tierce), la page publique `/informations` et le point de santé, périmètre non authentifié :
 
 | Résultat | Valeur |
 | --- | --- |
