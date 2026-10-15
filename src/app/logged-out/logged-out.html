@@ -1,0 +1,29 @@
+<div class="logged-out">
+  <app-brand-header></app-brand-header>
+
+  <section class="content" aria-labelledby="titre-deconnexion">
+    <!-- Pictogramme purement décoratif (le titre porte le sens) : masqué aux lecteurs d'écran. -->
+    <svg class="success-icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <circle cx="60" cy="60" r="56" fill="#eaf2f4" />
+      <circle cx="60" cy="60" r="40" fill="#00445a" />
+      <polyline
+        points="42,61 54,73 80,47"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+
+    <h1 id="titre-deconnexion">Déconnexion réussie</h1>
+    <p class="message">
+      Vous avez été déconnecté en toute sécurité. Votre session n'est plus active.
+    </p>
+
+    <button mat-flat-button routerLink="/">
+      <mat-icon aria-hidden="true">home</mat-icon>
+      Retour à l'accueil
+    </button>
+  </section>
+</div>

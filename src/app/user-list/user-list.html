@@ -1,0 +1,201 @@
+<div class="user-list-container">
+  <!-- Titre de page réservé aux lecteurs d'écran : l'écran montre directement le bandeau puis les onglets. -->
+  <h1 class="visually-hidden">Gestion des comptes TOTP, appareils de confiance et sessions SSO</h1>
+
+  <div class="stats-row" role="group" aria-label="Statistiques">
+    <div class="stat-tile">
+      <span class="stat-value">{{ accountsCount() }}</span>
+      <span class="stat-label">Comptes TOTP enrôlés</span>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-value">{{ devicesCount() }}</span>
+      <span class="stat-label">Appareils de confiance</span>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-value">{{ sessionsCount() }}</span>
+      <span class="stat-label">Sessions SSO actives</span>
+    </div>
+    <!-- Compteur du journal : profil administration seulement (la consultation ne lit pas le journal). -->
+    @if (isAdmin()) {
+    <div class="stat-tile" [class.warning]="auditLogCountIsHigh()">
+      <span class="stat-value">{{ auditLogCount() }}</span>
+      <span class="stat-label">Suppressions journalisées</span>
+    </div>
+    }
+  </div>
+
+  <app-search-bar (search)="onSearch($event)"></app-search-bar>
+
+  <!-- Chargement : spinner décoratif, l'état est porté par le texte réservé aux lecteurs d'écran. -->
+  @if (loading()) {
+    <output class="loading-row">
+      <mat-spinner diameter="32" aria-hidden="true"></mat-spinner>
+      <span class="visually-hidden">Chargement des données en cours…</span>
+    </output>
+  }
+
+  <mat-tab-group aria-label="Catégories de données">
+    <mat-tab [label]="'Comptes TOTP (' + filteredAccounts().length + ')'">
+      <table mat-table [dataSource]="pagedAccounts()" class="data-table" aria-label="Comptes TOTP">
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Identifiant</th>
+          <td mat-cell *matCellDef="let account">
+            <!-- Session : pastille décorative (disque plein = active, contour vide = aucune), doublée d'un texte pour les lecteurs d'écran. -->
+            <span class="status-dot" [class.active]="hasActiveSession(account.username)" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ hasActiveSession(account.username) ? 'Session active : ' : 'Pas de session active : ' }}</span>
+            {{ account.username }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Appareil</th>
+          <td mat-cell *matCellDef="let account">{{ account.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="registrationDate">
+          <th mat-header-cell *matHeaderCellDef>Enrôlé le</th>
+          <td mat-cell *matCellDef="let account">{{ account.registrationDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let account" class="actions-cell">
+            <button mat-stroked-button type="button" (click)="viewAccount(account.username)" title="Afficher les détails" [attr.aria-label]="'Afficher les détails de ' + account.username">
+              <span aria-hidden="true">🔍</span> Afficher
+            </button>
+            <!-- Suppression et révocation : profil administration seulement (le BFF refuse de toute façon les autres). -->
+            @if (isAdmin()) {
+              <button mat-flat-button type="button" class="btn-delete" (click)="deleteAccount(account)" title="Supprimer le compte TOTP" [attr.aria-label]="'Supprimer le compte TOTP de ' + account.username">
+                <span aria-hidden="true">🗑️</span> Supprimer
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="accountColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: accountColumns"></tr>
+      </table>
+
+      <!-- Même schéma pour les trois onglets : message à la place du paginateur quand rien n'est à afficher (hors chargement). -->
+      @if (filteredAccounts().length === 0 && !loading()) {
+        <p class="empty-message">Aucun compte TOTP.</p>
+      } @else {
+        <mat-paginator
+          aria-label="Pagination des comptes TOTP"
+          [length]="filteredAccounts().length"
+          [pageIndex]="accountsPageIndex()"
+          [pageSize]="accountsPageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onAccountsPage($event)"
+        ></mat-paginator>
+      }
+    </mat-tab>
+
+    <mat-tab [label]="'Appareils de confiance (' + filteredDevices().length + ')'">
+      <table mat-table [dataSource]="pagedDevices()" class="data-table" aria-label="Appareils de confiance">
+        <ng-container matColumnDef="principal">
+          <th mat-header-cell *matHeaderCellDef>Identifiant</th>
+          <td mat-cell *matCellDef="let device">
+            <span class="status-dot" [class.active]="hasActiveSession(device.principal)" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ hasActiveSession(device.principal) ? 'Session active : ' : 'Pas de session active : ' }}</span>
+            {{ device.principal }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Appareil</th>
+          <td mat-cell *matCellDef="let device">{{ device.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="recordDate">
+          <th mat-header-cell *matHeaderCellDef>Enregistré le</th>
+          <td mat-cell *matCellDef="let device">{{ device.recordDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="expirationDate">
+          <th mat-header-cell *matHeaderCellDef>Expire le</th>
+          <td mat-cell *matCellDef="let device">{{ device.expirationDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let device" class="actions-cell">
+            <button mat-stroked-button type="button" (click)="viewAccount(device.principal)" title="Afficher les détails" [attr.aria-label]="'Afficher les détails de ' + device.principal">
+              <span aria-hidden="true">🔍</span> Afficher
+            </button>
+            @if (isAdmin()) {
+              <button mat-flat-button type="button" class="btn-delete" (click)="revokeDevice(device)" title="Révoquer l'appareil de confiance" [attr.aria-label]="'Révoquer l’appareil ' + device.name + ' de ' + device.principal">
+                <span aria-hidden="true">🗑️</span> Révoquer
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="deviceColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: deviceColumns"></tr>
+      </table>
+
+      @if (filteredDevices().length === 0 && !loading()) {
+        <p class="empty-message">Aucun appareil de confiance.</p>
+      } @else {
+        <mat-paginator
+          aria-label="Pagination des appareils de confiance"
+          [length]="filteredDevices().length"
+          [pageIndex]="devicesPageIndex()"
+          [pageSize]="devicesPageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onDevicesPage($event)"
+        ></mat-paginator>
+      }
+    </mat-tab>
+
+    <mat-tab [label]="'Sessions SSO (' + filteredSessions().length + ')'">
+      <table mat-table [dataSource]="pagedSessions()" class="data-table" aria-label="Sessions SSO">
+        <ng-container matColumnDef="principal">
+          <th mat-header-cell *matHeaderCellDef>Identifiant</th>
+          <td mat-cell *matCellDef="let session">{{ session.authenticated_principal }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="authenticationDate">
+          <th mat-header-cell *matHeaderCellDef>Authentifié le</th>
+          <td mat-cell *matCellDef="let session">{{ session.authentication_date_formatted | date: 'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="services">
+          <th mat-header-cell *matHeaderCellDef>Application(s)</th>
+          <td mat-cell *matCellDef="let session">{{ sessionServices(session) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let session" class="actions-cell">
+            <button mat-stroked-button type="button" (click)="viewAccount(session.authenticated_principal)" title="Afficher les détails" [attr.aria-label]="'Afficher les détails de ' + session.authenticated_principal">
+              <span aria-hidden="true">🔍</span> Afficher
+            </button>
+            @if (isAdmin()) {
+              <button mat-flat-button type="button" class="btn-delete" (click)="revokeSession(session)" title="Révoquer la session SSO" [attr.aria-label]="'Révoquer la session SSO de ' + session.authenticated_principal">
+                <span aria-hidden="true">🗑️</span> Révoquer
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="sessionColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: sessionColumns"></tr>
+      </table>
+
+      @if (filteredSessions().length === 0 && !loading()) {
+        <p class="empty-message">Aucune session SSO active.</p>
+      } @else {
+        <mat-paginator
+          aria-label="Pagination des sessions SSO"
+          [length]="filteredSessions().length"
+          [pageIndex]="sessionsPageIndex()"
+          [pageSize]="sessionsPageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onSessionsPage($event)"
+        ></mat-paginator>
+      }
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,120 @@
+/**
+ *  Ma-Moulinette - MIAM
+ *  --------------
+ *  Copyright (c) 2015-2026.
+ *  Laurent HADJADJ <laurent_h@me.com>.
+ *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  ---
+ *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
+ *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ */
+
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: mat.$azure-palette,
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // Material 3 arrondit les boutons en pilule par défaut (shape "full") -
+  // ce projet veut des boutons carrés (coins légèrement adoucis, pas une pilule).
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 4px,
+      outlined-container-shape: 4px,
+      protected-container-shape: 4px,
+      text-container-shape: 4px,
+      tonal-container-shape: 4px,
+    )
+  );
+
+  height: 100%;
+}
+
+// Couleur primaire alignée sur le thème MIAM (attribut data-theme posé sur <html>
+// par ThemeService). Teintes foncées de celles du logo (#e59a3c / #56789c) pour
+// rester lisibles dans les deux usages de "primary" : fond de bouton (texte blanc)
+// et texte/contour sur fond blanc - contraste >= 4.5:1 (WCAG 2.1 AA) dans les deux cas.
+html[data-theme='orange'] {
+  --mat-sys-primary: #a85a00;
+  --mat-sys-on-primary: #ffffff;
+}
+
+html[data-theme='bleu'] {
+  --mat-sys-primary: #3c5a78;
+  --mat-sys-on-primary: #ffffff;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+table.data-table {
+  width: 100%;
+}
+
+// Bouton destructif (Supprimer / Révoquer) : global car aussi utilisé dans la boîte de confirmation (overlay hors composant).
+// #8a2115 sur blanc : contraste 8,6:1.
+.btn-delete {
+  background-color: #8a2115 !important;
+  color: #fff !important;
+}
+
+.btn-delete:hover {
+  background-color: #6e1a10 !important;
+}
+
+// Texte réservé aux technologies d'assistance (lecteurs d'écran, transcription vocale).
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Lien d'évitement : visible uniquement au focus clavier.
+.skip-link {
+  position: absolute;
+  top: -4rem;
+  left: 0.5rem;
+  z-index: 2000;
+  padding: 0.75rem 1rem;
+  background: #1f2933;
+  color: #ffffff;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+// Focus clavier toujours visible (WCAG 2.4.7).
+:focus-visible {
+  outline: 3px solid #1a5fb4;
+  outline-offset: 2px;
+}
+
+// Le conteneur principal reçoit le focus programmatique après une navigation : pas de cadre.
+main:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,78 @@
+/**
+ *  Ma-Moulinette - MIAM
+ *  --------------
+ *  Copyright (c) 2015-2026.
+ *  Laurent HADJADJ <laurent_h@me.com>.
+ *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  ---
+ *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
+ *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ */
+
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  border: 1px solid #dce7ea;
+  border-radius: 999px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.theme-switch:hover {
+  border-color: #b7cdd3;
+}
+
+.theme-switch:focus-visible {
+  outline: 2px solid #00445a;
+  outline-offset: 2px;
+}
+
+/* "xsmall"/"small" : une seule pastille, cible tactile 44x44 - voir brand-header.html. */
+.theme-switch-compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #dce7ea;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  padding: 0;
+}
+
+.theme-switch-compact:hover {
+  border-color: #b7cdd3;
+}
+
+.theme-switch-compact:focus-visible {
+  outline: 2px solid #00445a;
+  outline-offset: 2px;
+}
+
+.theme-switch-compact .swatch {
+  width: 26px;
+  height: 26px;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-block;
+  color: transparent;
+}
+
+.swatch-bleu {
+  background: #56789c;
+}
+
+.swatch-orange {
+  background: #e59a3c;
+}
+
+.swatch.active {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #00445a;
+}

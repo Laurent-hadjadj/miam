@@ -1,0 +1,9 @@
+<div class="notification-bar" [class.visible]="notifications.message()">
+  <!-- `<output>` toujours rendu, même vide : une zone live doit exister avant que son texte change. -->
+  <output class="notification-text">{{ notifications.message() }}</output>
+  @if (notifications.message()) {
+    <button type="button" class="notification-close" aria-label="Fermer le message" (click)="notifications.dismiss()">
+      <mat-icon aria-hidden="true">close</mat-icon>
+    </button>
+  }
+</div>

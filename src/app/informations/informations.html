@@ -1,0 +1,77 @@
+<!-- Un agent connecté a déjà la barre d'outils de l'application : l'en-tête de marque ne sert qu'au visiteur. -->
+@if (!auth.isAuthenticated()) {
+  <app-brand-header></app-brand-header>
+}
+
+<article class="informations" aria-labelledby="titre-informations">
+  <button mat-stroked-button type="button" (click)="back()" aria-label="Retour à la page précédente">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Retour
+  </button>
+
+  <h1 id="titre-informations">Informations sur vos données personnelles</h1>
+  <p class="intro">
+    MIAM est la console qui permet au centre de services de débloquer les utilisateurs de la double
+    authentification (compte TOTP, appareils de confiance, sessions) et de garder la trace de ces actions.
+  </p>
+
+  <h2>Responsable du traitement</h2>
+  <p>
+    @if (controller) {
+      {{ controller }}.
+    } @else {
+      L'organisation qui exploite cette application (voir son registre des traitements).
+    }
+    @if (dpoContact) {
+      Délégué à la protection des données : <strong>{{ dpoContact }}</strong>.
+    } @else {
+      Pour toute question, contactez le délégué à la protection des données de votre organisation.
+    }
+  </p>
+
+  <h2>Personnes concernées et données traitées</h2>
+  <ul>
+    <li><strong>Les agents du centre de services</strong> : identifiant de connexion, profil (consultation ou administration), date et nature de chacune de leurs actions de suppression ou de révocation.</li>
+    <li><strong>Les utilisateurs dont le compte est géré</strong> : identifiant, nom et empreinte de l'appareil de confiance, sessions de connexion en cours. Ces informations sont lues en direct dans le service d'authentification et <strong>ne sont pas copiées</strong> par MIAM.</li>
+  </ul>
+  <p>Les secrets d'authentification (clé et codes de secours TOTP) ne sont jamais transmis à l'application.</p>
+
+  <h2>Finalité et base légale</h2>
+  <p>
+    Débloquer un utilisateur, sécuriser les accès et pouvoir attribuer chaque action à son auteur.
+    @if (legalBasis) {
+      Base légale : {{ legalBasis }}.
+    } @else {
+      La base légale figure au registre des traitements de l'organisation.
+    }
+    Aucune décision automatisée n'est prise et les données ne sont pas utilisées à d'autres fins.
+  </p>
+
+  <h2>Durée de conservation</h2>
+  <p>
+    Le journal des actions est conservé <strong>{{ retentionMonths }} mois</strong>, puis supprimé automatiquement.
+    La session de l'agent expire au bout de 8 heures. Le choix du thème (orange ou bleu) est mémorisé un an
+    dans le navigateur, sans donnée personnelle.
+  </p>
+
+  <h2>Destinataires</h2>
+  <p>
+    Les agents habilités du centre de services (profil administration pour le journal), le délégué à la
+    protection des données et les personnes en charge de la sécurité. Aucune donnée n'est transmise à un
+    tiers ni hors de l'Union européenne : l'application n'appelle aucun service extérieur.
+  </p>
+
+  <h2>Vos droits</h2>
+  <p>
+    Vous pouvez demander l'accès aux données qui vous concernent, vous opposer à leur traitement pour des
+    raisons tenant à votre situation particulière, ou demander leur limitation. Le journal étant une trace
+    de sécurité, l'effacement n'intervient qu'à l'échéance de sa durée de conservation.
+    Adressez votre demande
+    @if (dpoContact) {
+      à <strong>{{ dpoContact }}</strong>
+    } @else {
+      au délégué à la protection des données de votre organisation
+    }
+    ; en cas de difficulté, vous pouvez saisir la CNIL (<span lang="en">cnil.fr</span>).
+  </p>
+</article>

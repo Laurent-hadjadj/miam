@@ -1,0 +1,38 @@
+<div class="home">
+  <app-brand-header></app-brand-header>
+
+  <section class="hero" aria-labelledby="titre-accueil">
+    <div class="hero-illustration {{ verticalLogoSizeClass }}">
+      <img [src]="verticalLogoUrl" alt="MIAM - MFA Incident Access Management" />
+    </div>
+    <div class="hero-text">
+      <h1 id="titre-accueil">Bienvenue,</h1>
+      <p class="tagline">
+        sur la console d'administration des comptes TOTP et des appareils de confiance,
+        réservée au centre de services.
+      </p>
+
+      <!-- Zone `<output>` (rôle status) : l'attente est annoncée sans déplacer le focus ; le spinner est décoratif. -->
+      @if (validating()) {
+        <output class="status">
+          <mat-spinner diameter="28" aria-hidden="true"></mat-spinner>
+          <span>Vérification de votre authentification…</span>
+        </output>
+      } @else {
+        <!-- role="alert" : l'échec est annoncé tout de suite ; le bouton reste ensuite disponible pour réessayer. -->
+        @if (error()) {
+          <output class="error-banner" role="alert">
+            <mat-icon aria-hidden="true">error_outline</mat-icon>
+            <span>{{ error() }}</span>
+          </output>
+        }
+        <button mat-flat-button type="button" class="login-button" (click)="login()">
+          <mat-icon aria-hidden="true">lock_open</mat-icon>
+          Se connecter
+        </button>
+        <p class="hint">Authentification CAS avec double facteur obligatoire.</p>
+      }
+    </div>
+
+  </section>
+</div>

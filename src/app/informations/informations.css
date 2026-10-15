@@ -1,0 +1,31 @@
+.informations {
+  box-sizing: border-box;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  line-height: 1.6;
+}
+
+h1 {
+  margin: 1.25rem 0 0.5rem;
+  color: #00445a;
+}
+
+h2 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.15rem;
+  color: #00445a;
+}
+
+.intro {
+  color: #3c5a63;
+  font-size: 1.05rem;
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}

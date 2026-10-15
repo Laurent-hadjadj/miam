@@ -1,0 +1,86 @@
+<div class="journal-container">
+  <h1>Journal d'activité</h1>
+
+  <!-- Deux filtres distincts : « agent » (qui a agi) et « compte concerné » (qui a subi l'action). -->
+  <div class="filters-row">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-icon matPrefix aria-hidden="true">person</mat-icon>
+      <input
+        matInput
+        type="search"
+        autocomplete="off"
+        aria-label="Filtrer par agent (qui a agi)"
+        placeholder="Filtrer par agent (qui a agi)"
+        [value]="actorFilter()"
+        (input)="onActorFilter($any($event.target).value)"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-icon matPrefix aria-hidden="true">person_search</mat-icon>
+      <input
+        matInput
+        type="search"
+        autocomplete="off"
+        aria-label="Filtrer par compte concerné (qui a subi l'action)"
+        placeholder="Filtrer par compte concerné (qui a subi l'action)"
+        [value]="targetFilter()"
+        (input)="onTargetFilter($any($event.target).value)"
+      />
+    </mat-form-field>
+  </div>
+
+  <!-- Chargement : spinner décoratif, l'état est porté par le texte réservé aux lecteurs d'écran et par aria-busy du tableau. -->
+  @if (loading()) {
+    <output class="loading-row">
+      <mat-spinner diameter="32" aria-hidden="true"></mat-spinner>
+      <span class="visually-hidden">Chargement du journal en cours…</span>
+    </output>
+  }
+
+  <table mat-table [dataSource]="pagedEntries()" class="data-table" aria-label="Journal d'activité" [attr.aria-busy]="loading()">
+    <ng-container matColumnDef="timestamp">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let entry">{{ entry.timestamp | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actor">
+      <th mat-header-cell *matHeaderCellDef>Agent</th>
+      <td mat-cell *matCellDef="let entry">{{ entry.actor }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="action">
+      <th mat-header-cell *matHeaderCellDef>Action</th>
+      <td mat-cell *matCellDef="let entry">{{ actionLabel(entry.action) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="target">
+      <th mat-header-cell *matHeaderCellDef>Compte concerné</th>
+      <td mat-cell *matCellDef="let entry">
+        <!-- Sans compte concerné (suppression en masse) : tiret visuel, remplacé par un texte pour les lecteurs d'écran. -->
+        @if (entry.target) {
+          <button mat-button type="button" (click)="viewTarget(entry.target)" [attr.aria-label]="'Afficher le détail du compte ' + entry.target">{{ entry.target }}</button>
+        } @else {
+          <span aria-hidden="true">—</span><span class="visually-hidden">Aucun compte concerné</span>
+        }
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  <!-- Le paginateur est remplacé par un message quand rien n'est à afficher (hors chargement). -->
+  @if (filteredEntries().length === 0 && !loading()) {
+    <p class="empty-message">Aucune activité enregistrée.</p>
+  } @else {
+    <mat-paginator
+      aria-label="Pagination du journal"
+      [length]="filteredEntries().length"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPage($event)"
+    ></mat-paginator>
+  }
+</div>

@@ -1,0 +1,15 @@
+<!-- Titre et message sont lus à l'ouverture de la boîte `alertdialog` (rôle posé par ConfirmService). -->
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content>
+  <p class="confirm-message">{{ data.message }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <!-- « Annuler » vient en premier : il reçoit le focus initial (autoFocus: first-tabbable). -->
+  <button mat-stroked-button type="button" [mat-dialog-close]="false">Annuler</button>
+  <button mat-flat-button type="button" class="btn-delete" [mat-dialog-close]="true">
+    @if (data.confirmEmoji) {
+      <span aria-hidden="true">{{ data.confirmEmoji }}</span>
+    }
+    {{ data.confirmLabel }}
+  </button>
+</mat-dialog-actions>

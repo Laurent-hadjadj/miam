@@ -1,0 +1,96 @@
+<div class="user-details-container">
+  <button mat-stroked-button type="button" (click)="onBack()" aria-label="Retour à la liste des utilisateurs">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Retour
+  </button>
+
+  <!-- État de session : pastille décorative (aria-hidden), doublée d'un texte réservé aux lecteurs d'écran. -->
+  <h1>
+    <span class="status-dot" [class.active]="hasActiveSession()" aria-hidden="true"></span>
+    <span class="visually-hidden">{{ hasActiveSession() ? 'Session active : ' : 'Pas de session active : ' }}</span>
+    {{ username() }}
+  </h1>
+
+  @if (loading()) {
+    <output class="loading-row">
+      <mat-spinner diameter="32" aria-hidden="true"></mat-spinner>
+      <span class="visually-hidden">Chargement des données en cours…</span>
+    </output>
+  }
+
+  <!-- Les boutons de suppression et de révocation ne sont rendus que pour le profil administration (le BFF refuse de toute façon les autres). -->
+  <mat-card>
+    <mat-card-header>
+      <h2 mat-card-title>Comptes TOTP</h2>
+    </mat-card-header>
+    <mat-card-content>
+      @if (accounts().length === 0) {
+        <p class="empty-message">Aucun compte TOTP enrôlé pour cet utilisateur.</p>
+      } @else {
+        @for (account of accounts(); track account.id) {
+          <div class="entry-row">
+            @if (isAdmin()) {
+              <button mat-flat-button type="button" class="btn-delete" (click)="deleteAccount(account)" title="Supprimer le compte TOTP" [attr.aria-label]="'Supprimer le compte TOTP ' + account.name">
+                <span aria-hidden="true">🗑️</span> Supprimer
+              </button>
+            }
+            <div class="entry-text">
+              <div class="entry-title">{{ account.name }}</div>
+              <div class="entry-line">Enrôlé le {{ account.registrationDate | date: 'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <h2 mat-card-title>Appareils de confiance</h2>
+    </mat-card-header>
+    <mat-card-content>
+      @if (devices().length === 0) {
+        <p class="empty-message">Aucun appareil de confiance pour cet utilisateur.</p>
+      } @else {
+        @for (device of devices(); track device.id) {
+          <div class="entry-row">
+            @if (isAdmin()) {
+              <button mat-flat-button type="button" class="btn-delete" (click)="revokeDevice(device)" title="Révoquer l'appareil de confiance" [attr.aria-label]="'Révoquer l’appareil ' + device.name">
+                <span aria-hidden="true">🗑️</span> Révoquer
+              </button>
+            }
+            <div class="entry-text">
+              <div class="entry-title">{{ device.name }}</div>
+              <div class="entry-line">Expire le {{ device.expirationDate | date: 'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <h2 mat-card-title>Sessions SSO</h2>
+    </mat-card-header>
+    <mat-card-content>
+      @if (sessions().length === 0) {
+        <p class="empty-message">Aucune session SSO active pour cet utilisateur.</p>
+      } @else {
+        @for (session of sessions(); track session.ticket_granting_ticket) {
+          <div class="entry-row">
+            @if (isAdmin()) {
+              <button mat-flat-button type="button" class="btn-delete" (click)="revokeSession(session)" title="Révoquer la session SSO" [attr.aria-label]="'Révoquer la session SSO de ' + username()">
+                <span aria-hidden="true">🗑️</span> Révoquer
+              </button>
+            }
+            <div class="entry-text">
+              <div class="entry-title">{{ session.authentication_date_formatted | date: 'dd/MM/yyyy HH:mm' }}</div>
+              <div class="entry-line">{{ sessionServices(session) }}</div>
+            </div>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

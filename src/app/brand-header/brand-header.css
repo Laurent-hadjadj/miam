@@ -1,0 +1,64 @@
+/**
+ *  Ma-Moulinette - MIAM
+ *  --------------
+ *  Copyright (c) 2015-2026.
+ *  Laurent HADJADJ <laurent_h@me.com>.
+ *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  ---
+ *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
+ *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ */
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2.5rem;
+}
+
+/* Point de rupture Material "xsmall"/"small" (ResponsiveService, brand-header.ts) -
+    pas une media-query isolée, pour rester synchronisé avec le choix d'image
+   (icône vs horizontal) et le switch compact/complet. */
+.brand-header.compact {
+  padding: 0.75rem 1.25rem;
+}
+
+.logo-group {
+  display: flex;
+  align-items: center;
+}
+
+.company-logo {
+  height: 48px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  margin-right: 1.25rem;
+  padding-right: 1.25rem;
+  border-right: 1px solid #dce7ea;
+}
+
+.brand-header.compact .company-logo {
+  height: 44px;
+}
+
+.miam-logo {
+  height: 80px;
+  width: auto;
+}
+
+.brand-header.compact .miam-logo {
+  height: 64px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Cible tactile minimale 44x44 (le bouton Material fait 40 px de haut). */
+.header-actions a {
+  min-width: 44px;
+  min-height: 44px;
+}

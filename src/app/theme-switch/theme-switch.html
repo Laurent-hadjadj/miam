@@ -1,0 +1,30 @@
+<!-- Interrupteur : aria-checked vaut « vrai » quand le thème orange est actif ; le nom reste fixe, `title` dit l'action. -->
+@if (isCompact()) {
+  <!-- "xsmall"/"small" : une seule pastille (couleur = thème actif), cible tactile 44x44 (plus
+       confortable qu'une paire de petits swatches côte à côte). Un seul tap bascule. -->
+  <button
+    type="button"
+    class="theme-switch-compact"
+    role="switch"
+    aria-label="Thème orange"
+    [attr.aria-checked]="theme() === 'orange'"
+    [title]="theme() === 'bleu' ? 'Passer au thème orange' : 'Passer au thème bleu'"
+    (click)="toggleTheme()"
+  >
+    <span aria-hidden="true" class="swatch" [class.swatch-bleu]="theme() === 'bleu'" [class.swatch-orange]="theme() === 'orange'"></span>
+  </button>
+} @else {
+  <!-- "medium" et plus : assez de place pour montrer les deux états côte à côte. -->
+  <button
+    type="button"
+    class="theme-switch"
+    role="switch"
+    aria-label="Thème orange"
+    [attr.aria-checked]="theme() === 'orange'"
+    [title]="theme() === 'bleu' ? 'Passer au thème orange' : 'Passer au thème bleu'"
+    (click)="toggleTheme()"
+  >
+    <span aria-hidden="true" class="swatch swatch-bleu" [class.active]="theme() === 'bleu'"></span>
+    <span aria-hidden="true" class="swatch swatch-orange" [class.active]="theme() === 'orange'"></span>
+  </button>
+}

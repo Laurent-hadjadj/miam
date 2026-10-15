@@ -1,0 +1,80 @@
+/**
+ *  Ma-Moulinette - MIAM
+ *  --------------
+ *  Copyright (c) 2015-2026.
+ *  Laurent HADJADJ <laurent_h@me.com>.
+ *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  ---
+ *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
+ *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ */
+
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-logo {
+  height: 44px;
+  width: auto;
+}
+
+.toolbar-title {
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+.username {
+  margin: 0 0.5rem;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* Pied de page "sticky" : toujours en bas du viewport sur une page courte,
+  repoussé naturellement (pas de position:fixed) sur une page longue - voir
+   app-footer pour la mise en forme du pied de page lui-même. */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar-nav {
+  display: flex;
+  align-items: center;
+}
+
+/* Page courante dans la navigation : soulignement (pas seulement une couleur). */
+.active-link {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+
+/* Profil lecture seule : texte + contour (pas seulement une couleur). */
+.role-badge {
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.toolbar-nav a {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Petit écran : le nom est tronqué (ellipse) pour que le bouton de déconnexion reste visible. */
+.username.compact {
+  max-width: 5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

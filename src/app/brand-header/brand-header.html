@@ -1,0 +1,17 @@
+<header class="brand-header" [class.compact]="isCompact()">
+  <div class="logo-group">
+    @if (companyLogoUrl) {
+      <img class="company-logo" [src]="companyLogoUrl" alt="Logo de l'entreprise" />
+    }
+    <img class="miam-logo" [src]="miamLogoUrl()" alt="MIAM - MFA Incident Access Management" />
+  </div>
+
+  <div class="header-actions">
+    <!-- En compact le texte « Informations » est retiré : l'icône seule reste nommée par aria-label. -->
+    <a mat-button routerLink="/informations" title="Informations sur vos données personnelles" aria-label="Informations sur vos données personnelles">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      @if (!isCompact()) { Informations }
+    </a>
+    <app-theme-switch></app-theme-switch>
+  </div>
+</header>

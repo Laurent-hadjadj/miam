@@ -1,0 +1,48 @@
+/**
+ *  Ma-Moulinette - MIAM
+ *  --------------
+ *  Copyright (c) 2015-2026.
+ *  Laurent HADJADJ <laurent_h@me.com>.
+ *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  ---
+ *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
+ *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ */
+
+
+.journal-container {
+  padding: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: #00445a;
+}
+
+.filters-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.filter-field {
+  flex: 1 1 280px;
+}
+
+.loading-row {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.data-table {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.empty-message {
+  padding: 1rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
