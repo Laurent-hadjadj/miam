@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 540" width="512" height="540">
+  <defs>
+    <linearGradient id="cookie" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8c471"/>
+      <stop offset="1" stop-color="#e59a3c"/>
+    </linearGradient>
+    <linearGradient id="shackle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6d4c41"/>
+      <stop offset="1" stop-color="#4e342e"/>
+    </linearGradient>
+    <mask id="bite">
+      <rect width="512" height="540" fill="white"/>
+      <circle cx="380" cy="208" r="50" fill="black"/>
+    </mask>
+  </defs>
+
+  <!-- Cadenas (anse + corps croqué) -->
+  <g mask="url(#bite)">
+    <path d="M196 235 V165 A60 60 0 0 1 316 165 V235"
+          fill="none" stroke="url(#shackle)" stroke-width="30"/>
+    <rect x="146" y="195" width="220" height="190" rx="38" fill="url(#cookie)"/>
+  </g>
+
+  <!-- Miettes près de la bouchée -->
+  <circle cx="398" cy="266" r="6" fill="#e59a3c"/>
+  <circle cx="416" cy="240" r="4" fill="#f8c471"/>
+
+  <!-- Reflet -->
+  <ellipse cx="200" cy="230" rx="30" ry="16" fill="#ffffff" opacity="0.35"
+           transform="rotate(-20 200 230)"/>
+
+  <!-- Pépites de chocolat -->
+  <circle cx="188" cy="255" r="11" fill="#7b4a12"/>
+  <circle cx="330" cy="262" r="9" fill="#7b4a12"/>
+  <circle cx="205" cy="345" r="10" fill="#7b4a12"/>
+  <circle cx="312" cy="352" r="12" fill="#7b4a12"/>
+
+  <!-- Visage -->
+  <circle cx="232" cy="278" r="10" fill="#4e342e"/>
+  <circle cx="280" cy="278" r="10" fill="#4e342e"/>
+  <path d="M236 302 Q256 320 276 302" fill="none" stroke="#4e342e"
+        stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="206" cy="298" rx="13" ry="8" fill="#f08080" opacity="0.55"/>
+  <ellipse cx="306" cy="298" rx="13" ry="8" fill="#f08080" opacity="0.55"/>
+
+  <!-- Nom -->
+  <text x="256" y="480" text-anchor="middle"
+        font-family="'Arial Black','Segoe UI',Arial,sans-serif"
+        font-weight="900" font-size="86" fill="#e59a3c"
+        letter-spacing="6">MIAM</text>
+  <text x="256" y="516" text-anchor="middle"
+        font-family="Arial,sans-serif" font-size="17" fill="#8d6e63"
+        letter-spacing="2.5">MFA INCIDENT ACCESS MANAGEMENT</text>
+</svg>
