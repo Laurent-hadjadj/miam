@@ -1,0 +1,52 @@
+# Exemple de déploiement - adapter les URL et fournir les secrets (fichier .env
+# ou variables d'environnement). Détail des variables : docs/exploitation/configuration.md.
+services:
+  miam:
+    build: .
+    ports:
+      - '8081:80'
+    environment:
+      # CAS vu par le module BFF : hôte + contexte (/sso, /cas, /user ou aucun, selon l'application.yml du CAS).
+      # C'est la seule valeur qui porte le contexte : l'API Actuator et l'adresse publique s'en déduisent.
+      CAS_BASE_URL: ${CAS_BASE_URL:?à renseigner}
+      # Origine du CAS vue du navigateur si elle diffère de MIAM (ex. http://cas.exemple.fr:9000) ;
+      # vide = même domaine que MIAM (reverse proxy relayant le contexte du CAS).
+      CAS_PUBLIC_ORIGIN: ${CAS_PUBLIC_ORIGIN:-}
+      # Seulement si l'API Actuator ou l'adresse publique ne se déduisent pas des valeurs ci-dessus.
+      CAS_ACTUATOR_BASE_URL: ${CAS_ACTUATOR_BASE_URL:-}
+      CAS_BASE_URL_PUBLIC: ${CAS_BASE_URL_PUBLIC:-}
+      # Compte HTTP Basic pour l'API Actuator (compte technique) et secret de session :
+      # obligatoires, le BFF refuse de démarrer en production sans eux.
+      ACTUATOR_USERNAME: ${ACTUATOR_USERNAME:?à renseigner}
+      ACTUATOR_PASSWORD: ${ACTUATOR_PASSWORD:?à renseigner}
+      SESSION_SECRET: ${SESSION_SECRET:?à renseigner}
+      # Habilitations : groupes AD (noms courts, séparés par des virgules). ROLE_ADMIN_GROUPS est
+      # obligatoire ; un agent hors de ces groupes n'ouvre pas de session.
+      ROLE_ADMIN_GROUPS: ${ROLE_ADMIN_GROUPS:?à renseigner}
+      ROLE_CONSULT_GROUPS: ${ROLE_CONSULT_GROUPS:-}
+      ROLE_ATTRIBUTE: ${ROLE_ATTRIBUTE:-memberOf}
+      # true nécessite d'être servi en HTTPS (reverse proxy TLS) ; false pour un accès en HTTP.
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      # Nombre de reverse proxys de confiance (1 derrière un proxy) et limitation de débit par IP et par minute.
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-20}
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-300}
+      HEALTHCHECK_RATE_LIMIT: ${HEALTHCHECK_RATE_LIMIT:-30}
+      # Conservation du journal d'activité, en mois (6 à 12).
+      AUDIT_RETENTION_MONTHS: ${AUDIT_RETENTION_MONTHS:-12}
+      # Niveau du journal technique sur la sortie standard : error, warn, info, debug.
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Optionnels : logo d'entreprise, auteur et version du pied de page.
+      LOGO_URL: ${LOGO_URL:-}
+      APP_AUTHOR: ${APP_AUTHOR:-}
+      APP_VERSION: ${APP_VERSION:-}
+      # Page /informations (RGPD) : mentions de l'organisation.
+      PRIVACY_CONTROLLER: ${PRIVACY_CONTROLLER:-}
+      PRIVACY_DPO_CONTACT: ${PRIVACY_DPO_CONTACT:-}
+      PRIVACY_LEGAL_BASIS: ${PRIVACY_LEGAL_BASIS:-}
+    volumes:
+      # Journal d'activité SQLite - survit aux recréations du conteneur.
+      - miam-audit-log:/app/server/data
+
+volumes:
+  miam-audit-log:

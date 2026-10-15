@@ -1,0 +1,21 @@
+{
+  "@class" : "org.apereo.cas.services.CasRegisteredService",
+  "serviceId" : "^https://miam\\.exemple\\.fr(/.*)?$",
+  "name" : "MIAM",
+  "description" : "MIAM - console d'administration des comptes TOTP, appareils de confiance et sessions SSO pour le centre de services. MFA obligatoire, groupes AD (memberOf) libérés pour déduire le profil de l'agent.",
+  "id" : 999,
+  "evaluationOrder" : 0,
+  "attributeReleasePolicy" : {
+    "@class" : "org.apereo.cas.services.ReturnAllowedAttributeReleasePolicy",
+    "allowedAttributes" : [ "java.util.ArrayList", [ "memberOf" ] ],
+    "authorizedToReleaseProxyGrantingTicket" : false
+  },
+  "multifactorAuthenticationPolicy" : {
+    "@class" : "org.apereo.cas.services.DefaultRegisteredServiceMultifactorPolicy",
+    "multifactorAuthenticationProviders" : [ "mfa-gauth" ],
+    "failureMode" : "CLOSED",
+    "forceExecution" : true,
+    "bypassTrustedDeviceEnabled" : true
+  },
+  "logoutType" : "NONE"
+}
