@@ -90,12 +90,14 @@ sequenceDiagram
 `/env.js` (route du module BFF, ou `public/env.js` en développement) permet de surcharger la configuration publique de l'application, notamment `window.__env` avant le démarrage d'Angular :
 
 - `casBaseUrl` : URL de base du serveur CAS (http?s:`<host>`:?`<port>`/?cas),
+- `prefixUrl` : permet d'injecter un prefix aux routes définies.
 - `logoUrl` : pour ajouter un logo d'entreprise,
 - `appAuthor` : pour ajouter le nom de l'entreprise,
 - `privacyController` : DPO, Personne chargée de piloter la conformité RGPD de l'établissement,
 - `privacyDpoContact` : Contact du DPO,
 - `privacyLegalBasis` : mission d'intérêt public / intérêt légitime,
 - `auditRetentionMonths` : Durée de rétention des données (6 à 12 mois) conformément au RGPD.
+- `environnement` : défini le type d'environnement cible de MIAM.
 
 Une même image sert tous les environnements, seules les variables d'environnement du conteneur changent. Rien de secret n'y figure.
 
@@ -114,10 +116,10 @@ Une même image sert tous les environnements, seules les variables d'environneme
 | --- | --- | --- |
 | `GET /env.js` | non | Configuration publique |
 | `GET /api/public/healthcheck/status` | non | Point de santé (journal SQLite + CAS), 200 / 503 / 429 — voir [Déploiement](../exploitation/deploiement.md) |
-| `POST /bff/session` | non | Valide le ticket auprès du serveur CAS, lit les groupes (`memberOf`), déduit le profil et ouvre la session ; **403** si l'agent n'est dans aucun groupe |
+| `POST {prefixUrl}/bff/session` | non | Valide le ticket auprès du serveur CAS, lit les groupes (`memberOf`), déduit le profil et ouvre la session ; **403** si l'agent n'est dans aucun groupe |
 | `GET /bff/session` | session | Identité et profil de l'agent (401 sinon) |
-| `POST /bff/logout` | — | Détruit la session |
-| `GET /bff/audit-log` | session **admin** | 2 000 dernières entrées du journal (403 pour la consultation) |
+| `POST {prefixUrl}/bff/logout` | — | Détruit la session |
+| `GET {prefixUrl}/bff/audit-log` | session **admin** | 2 000 dernières entrées du journal (403 pour la consultation) |
 | `GET /api/*` | session | Relais de lecture vers l'API Actuator du serveur CAS |
 | `DELETE /api/*` | session **admin** | Relais de suppression (403 pour la consultation, rien n'est envoyé à CAS) |
 | `POST`/`PUT`/`PATCH /api/*` | session | **405** : seules la lecture et la suppression sont relayées (l'import de comptes TOTP, par exemple, n'est pas exposé) |
