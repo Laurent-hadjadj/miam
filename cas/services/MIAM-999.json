@@ -17,5 +17,6 @@
     "forceExecution" : true,
     "bypassTrustedDeviceEnabled" : true
   },
-  "logoutType" : "NONE"
+  "logoutType": "BACK_CHANNEL",
+  "logoutUrl" : "https://miam.exemple.fr/deconnexion"
 }
