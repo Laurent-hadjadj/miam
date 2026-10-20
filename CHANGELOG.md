@@ -4,6 +4,35 @@ Toutes les évolutions notables de MIAM sont documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.1.0] - 2026-10-20
+
+### Corrigé
+
+- **Sessions SSO — décalage horaire +2 h** : le pipe `date` de Angular convertissait implicitement les dates UTC en heure locale Paris (CEST). Ajout du paramètre `'UTC'` au pipe `date` dans les onglets « Sessions SSO » et les fiches utilisateur pour un affichage cohérent ;
+- **Journal — compte concerné cliquable** : la colonne « Compte concerné » affichait un bouton `<button>` ouvrant la fiche utilisateur. Remplacé par un `<span>` — le journal est statique, pas de navigation ;
+- **Journal — noms de comptes erronés** : le mappage via `TotpAccount.name` retournait le nom de l'appareil TOTP (ex. « Poste 19 ») au lieu du login du compte. Le champ s'affiche désormais tel quel (`entry.target`) ;
+- **Journal — lignes manquantes** : le filtrage et la pagination étaient corrects mais un code de mapping TOTP parasite interférait avec l'affichage. Nettoyé ;
+
+### Amélioré
+
+- **Déconnexion auto après révocation SSO** : si un utilisateur se révoque sa propre session SSO, il est déconnecté de l'application (comme pour la suppression de son propre compte TOTP). La vérification `casAuth.username()` garantit qu'un admin qui révoque le compte d'un autre utilisateur ne le déconnecte pas ;
+- **Révocation appareil de confiance — journal** : le `target` du journal contenait le `recordKey` JWT au lieu du login du compte concerné. Le frontend envoie désormais le `principal` en query string (comme pour les sessions SSO), et le module BFF l'utilise comme `target` dans le journal. Fallback sur l'extraction du login du recordKey pour les appels sans `principal` ;
+- **Badge d'environnement** : nouvelle variable `ENVIRONMENT` (DEV, INT, REC, PRD) affichée dans l'en-tête à côté du logo MIAM sous forme de badge coloré. Exposée via `/env.js`, configurée dans `.env.example`, Dockerfile et docker-compose ;
+- **Journal — colonne `target_display`** : la méthode `audit.record()` accepte désormais 5 paramètres (`target_display` ajouté). Le TGT n'est plus stocké dans le journal (retiré de `prepareApiDeleteAudit`) ;
+- **Infra** : Ajout d'un prefix devant les routes /bff/* :
+
+### Configuration
+
+- **ENVIRONMENT** : variable `ENVIRONMENT` (DEV/INT/REC/PRD) ajoutée dans `.env.example`, `server/config.js`, `Dockerfile` et `docker-compose.yml`. Exposée au navigateur via `/env.js` et affichée dans l'en-tête ;
+
+### Tests
+
+- **Journal** : cible affichée en texte brut (plus de bouton cliquable) — tests unitaires et e2e mis à jour ;
+- **Déconnexion auto** : tests ajoutés pour la révocation de sa propre session SSO (user-list + user-details) et vérification qu'une session d'un autre utilisateur ne déconnecte pas ;
+- **TrustedDeviceService** : 4 nouveaux tests unitaires (liste, liste par utilisateur, révocation avec/sans principal) ;
+- **ENVIRONMENT** : test unitaire dans `config.test.js` ;
+- Compteur : 123 tests unitaires Angular (au lieu de 116), 52 tests du module BFF (au lieu de 51) ;
+
 ## [1.0.0] - 2026-10-15
 
 Première version livrable : console d'administration des comptes TOTP, appareils de confiance et sessions SSO d'un serveur CAS protégé par MFA.
@@ -25,8 +54,8 @@ Première version livrable : console d'administration des comptes TOTP, appareil
 **Contexte CAS configurable** : Le contexte du CAS (`/sso`, `/cas`, `/user` ou aucun) n'est écrit qu'à un endroit, `CAS_BASE_URL` ; des API Actuator et l'adresse vue du navigateur s'en déduisent (`CAS_PUBLIC_ORIGIN` pour un autre hôte ou port), proxy de `ng serve` compris ;
 **Point de santé** : `GET /api/public/healthcheck/status` (journal SQLite + CAS, 200 / 503 / 429, cache 5 s, 30 appels/min/IP), `HEALTHCHECK` Docker ;
 **Chargement à la demande** : Pages de gestion et journal en *lazy loading* (bundle initial 663 Ko pour un budget à 700 Ko) ;
-**Déploiement** : Image Docker et exemple Docker Compose, volume du journal, démarrage **refusé en production** sans `SESSION_SECRET`, `ACTUATOR_USERNAME` et `ACTUATOR_PASSWORD` ;
-**Tests** : 116 tests unitaires Angular (95 % de lignes couvertes, seuils bloquants à 85 %), 51 tests du module BFF (98 % de lignes), 60 tests Playwright avec backend entièrement simulé ;
+**Déploiement** : Image Docker et exemple Docker Compose, volume du journal, démarrage **refusé en production** sans `SESSION_SECRET`, `ACTUATOR_USERNAME` et `ACTUATOR_PASSWORD` ; **environnement** : variable `ENVIRONMENT` (DEV/INT/REC/PRD) propagée du `.env` au navigateur, badge visuel dans l'en-tête ;
+**Tests** : 123 tests unitaires Angular (95 % de lignes couvertes, seuils bloquants à 85 %), 52 tests du module BFF (98 % de lignes), 60 tests Playwright avec backend entièrement simulé ;
 **Sécurité** : Scan ZAP actif (0 échec, 111 contrôles réussis, 2 avertissements sans objet), `npm audit` sans vulnérabilité ;
 **Habilitations** : Profil de l'agent déduit des groupes AD (`memberOf`) libérés par CAS : *administration* (suppression, révocation, journal) ou *consultation* (lecture seule) ; un agent hors des groupes n'ouvre pas de session ; droits appliqués par le BFF (403), boutons masqués dans l'interface ; aucune table d'habilitations dans MIAM ; `ROLE_ADMIN_GROUPS` obligatoire en production ;
 **Information des personnes** : Page publique `/informations` (responsable, finalité, durée, droits), liée depuis l'en-tête et la barre d'outils, mentions de l'organisme par `PRIVACY_*` ;
