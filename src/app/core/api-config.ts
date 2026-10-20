@@ -26,6 +26,7 @@ declare global {
      * sont facultatifs : une valeur absente ou vide retombe sur le défaut de la constante concernée.
      */
     __env?: {
+      prefixUrl?: string;
       casBaseUrl?: string;
       logoUrl?: string;
       appAuthor?: string;
@@ -40,8 +41,8 @@ declare global {
 
 /**
  * Proxy BFF (server/app.js), même origine - jamais de secret ici. Le
- * navigateur ne communique plus directement avec l'API Actuator du seveur CAS : 
- * le BFF détient les identifiants HTTP Basic côté serveur et exige une 
+ * navigateur ne communique plus directement avec l'API Actuator du seveur CAS :
+ * le BFF détient les identifiants HTTP Basic côté serveur et exige une
  * session valide (ouverte uniquement après validation réelle d'un ticket CAS)
  * avant de relayer quoi que ce soit. Voir l'audit de sécurité : l'ancien schéma
  * (identifiants actuator dans window.__env, servis sans authentification) permettait à
@@ -84,3 +85,6 @@ export const PRIVACY_DPO_CONTACT = window.__env?.privacyDpoContact || '';
 export const PRIVACY_LEGAL_BASIS = window.__env?.privacyLegalBasis || '';
 /** Durée de conservation du journal d'activité, en mois (AUDIT_RETENTION_MONTHS du BFF). */
 export const AUDIT_RETENTION_MONTHS = window.__env?.auditRetentionMonths || 12;
+
+/** Ajout d'un prefix utile avec Traefik + docker sur les infra d'entreprise. */
+export const PREFIX_URL = window.__env?.prefixUrl || '';
