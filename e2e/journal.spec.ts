@@ -16,7 +16,7 @@
  * - la liste affiche les entrées fournies par `GET /bff/audit-log` ;
  * - deux filtres INDÉPENDANTS : par agent (qui a agi) et par compte concerné (qui a subi l'action), qui se
  *   cumulent ;
- * - un clic sur le compte concerné ouvre son aperçu.
+ * - les comptes concernés sont affichés en texte brut (pas de navigation depuis le journal).
  *
  * Les entrées passent par le dernier paramètre de `mockActuator` (voir fixtures.ts).
  */
@@ -92,24 +92,16 @@ test.describe('Journal d\'activité', () => {
     await expect(page.locator('table.data-table tbody tr')).toHaveCount(2);
   });
 
-  test('cliquer sur le compte concerné ouvre sa page aperçu', async ({ page }) => {
+  test('le compte concerné est affiché en texte brut (pas de navigation depuis le journal)', async ({ page }) => {
     await withSession(page);
     await mockActuator(page, [], [], [], [
       { timestamp: '2026-10-01T08:00:00Z', actor: 'sophie.petite-coeur', action: 'DELETE_TOTP_ACCOUNT', target: 'alice.martin', detail: null },
     ]);
-    await page.route('**/api/gauthCredentialRepository/alice.martin', (route) =>
-      route.fulfill({ contentType: 'application/json', body: '[]' }),
-    );
-    await page.route('**/api/multifactorTrustedDevices/alice.martin', (route) =>
-      route.fulfill({ contentType: 'application/json', body: '[]' }),
-    );
-    await page.route('**/api/ssoSessions*', (route) =>
-      route.fulfill({ contentType: 'application/json', body: JSON.stringify({ activeSsoSessions: [] }) }),
-    );
-
     await page.goto('/journal');
-    await page.getByRole('button', { name: 'alice.martin' }).click();
 
-    await expect(page).toHaveURL('/users/alice.martin');
+    // Le compte concerné est visible en texte brut
+    await expect(page.getByText('alice.martin')).toBeVisible();
+    // Pas de bouton cliquable dans la colonne "Compte concerné"
+    await expect(page.getByRole('button', { name: 'alice.martin' })).not.toBeVisible();
   });
 });
