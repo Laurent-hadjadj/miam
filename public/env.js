@@ -5,6 +5,7 @@
 // BFF (voir server/index.js) - la même image sert donc dev/int/rec/prod
 // sans rebuild, juste en changeant les variables d'environnement.
 window.__env = {
+  prefixUrl: '',
   // casBaseUrl absent : contexte CAS par défaut (voir src/app/core/cas-defaults.ts). Autre contexte en
   // développement : casBaseUrl: '/cas', ou une adresse absolue ; vide = CAS à la racine du domaine.
   // Logo d'entreprise optionnel (URL ou chemin) - vide = aucun logo affiché.
