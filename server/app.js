@@ -17,7 +17,7 @@
  * méthode.
  *
  * Ordre de montage dans `createApp` (il compte) : en-têtes de sécurité, session, point de santé
- * public, `/env.js`, routes `/bff/*`, relais `/api` (limitation de débit, session, contrôle du
+ * public, `/env.js`, routes `${config.prefixUrl}/bff/*`, relais `/api` (limitation de débit, session, contrôle du
  * profil, préparation de l'audit, relais), fichiers statiques, repli SPA, gestionnaire d'erreurs.
  *
  * Ce que le module ne fait PAS : il ne conserve aucun compte ni habilitation (le profil vient
@@ -33,12 +33,13 @@ const { ADMIN, extractAttributeValues, resolveRole } = require('./roles');
 const { createHealthCheck, healthHandler } = require('./health');
 const { createRateLimiter, rateLimit } = require('./rate-limit');
 const logger = require('./logger');
+const { config } = require('node:process');
 
 /** Nom du cookie de session BFF ; réutilisé à la déconnexion pour l'effacer. */
 const SESSION_COOKIE = 'totp-admin-session';
 
 /**
- * Extrait l'identifiant de l'agent d'une réponse de validation de ticket CAS 3.0 (XML).
+ * Extrait l'identifiant de l'utilisateur d'une réponse de validation de ticket CAS 3.0 (XML).
  * Le XML vient du serveur CAS (adresse configurée), jamais d'une entrée utilisateur : une
  * expression régulière suffit, sans analyseur XML. Seul un `authenticationSuccess` donne un nom.
  *
@@ -52,9 +53,8 @@ function extractUsername(xml) {
 
 /**
  * Journal d'activité (qui a supprimé quel compte TOTP / appareil / session, et
- * quand) - stocké dans un fichier SQLite propre à cette appli, PAS dans
- * MongoDB, PostgreSQL ou oracle : cette base appartient au serveur CAS. `node:sqlite` est intégré à Node >= 22
- * (aucune dépendance native).
+ * quand) - stocké dans un fichier SQLite propre à cette appli.
+ * `node:sqlite` est intégré à Node >= 22 (aucune dépendance native).
  *
  * Les API Actuator du serveur CAS s'authentifient toujours avec le même compte technique : le
  * serveur CAS ne peut donc pas savoir quel utilisateur a déclenché une suppression.
@@ -288,10 +288,11 @@ function createApp(config) {
   app.get('/env.js', (req, res) => {
     res.type('application/javascript').send(
       `window.__env = ${JSON.stringify({
+        /** on injecte le prefix d'URL */
+        prefixUrl: config.prefixUrl,
         casBaseUrl: config.casBaseUrlPublic,
         logoUrl: config.logoUrl,
         appAuthor: config.appAuthor,
-        appVersion: config.appVersion,
         privacyController: config.privacyController,
         privacyDpoContact: config.privacyDpoContact,
         privacyLegalBasis: config.privacyLegalBasis,
@@ -306,7 +307,7 @@ function createApp(config) {
    * 401 (ticket invalide), 403 (agent dans aucun groupe habilité), 502 (CAS injoignable).
    * La limitation de débit précède `express.json()` : une requête refusée n'est même pas analysée.
    */
-  app.post('/bff/session', rateLimit(createRateLimiter(config.loginRateLimit ?? 20), '/bff/session'), express.json(), async (req, res) => {
+  app.post(`${config.prefixUrl}/bff/session`, rateLimit(createRateLimiter(config.loginRateLimit ?? 20), `${config.prefixUrl}/bff/session`), express.json(), async (req, res) => {
     const { ticket, service } = req.body || {};
     if (!ticket || !service) {
       return res.status(400).json({ error: 'ticket et service requis' });
@@ -345,13 +346,13 @@ function createApp(config) {
   });
 
   // Permet à Angular de retrouver l'agent et son profil après un rechargement de page.
-  app.get('/bff/session', requireSession, (req, res) =>
+  app.get(`${config.prefixUrl}/bff/session`, requireSession, (req, res) =>
     res.json({ username: req.session.username, role: req.session.role }),
   );
 
   // Détruit la session côté serveur puis efface le cookie ; idempotent (204 même sans session).
   // Ne déconnecte pas de CAS : la fin de session SSO relève du navigateur et de CAS.
-  app.post('/bff/logout', (req, res) => {
+  app.post(`${config.prefixUrl}/bff/logout`, (req, res) => {
     if (!req.session) {
       return res.status(204).end();
     }
@@ -362,7 +363,7 @@ function createApp(config) {
   });
 
   // Journal d'activité réservé au profil administrateur (403 pour la consultation).
-  app.get('/bff/audit-log', requireSession, requireAdmin, (req, res) => res.json({ entries: audit.entries() }));
+  app.get(`${config.prefixUrl}/bff/audit-log`, requireSession, requireAdmin, (req, res) => res.json({ entries: audit.entries() }));
 
   // En-tête calculé une fois ; il ne quitte jamais le serveur (ajouté uniquement aux appels vers les API Actuator).
   const basicAuth = `Basic ${Buffer.from(`${config.actuatorUsername}:${config.actuatorPassword}`).toString('base64')}`;
