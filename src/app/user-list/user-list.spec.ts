@@ -262,6 +262,42 @@ describe('UserList', () => {
     });
   });
 
+  describe('révocation d\'une session SSO', () => {
+    it('révoque une session SSO et recharge la liste', () => {
+      const component = setup({ sessions: [ssoSession('alice')] }, 'admin');
+      vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
+      component.revokeSession(ssoSession('alice'));
+      const request = http.expectOne((r) => r.url === '/api/ssoSessions/TGT-alice');
+      expect(request.request.params.get('principal')).toBe('alice');
+      request.flush(null);
+      flushLoad({});
+    });
+
+    it('révoquer SA propre session déconnecte l\'application au lieu de recharger', () => {
+      const component = setup({ sessions: [ssoSession('bob')] }, 'bob');
+      const logout = vi.spyOn(TestBed.inject(CasAuthService), 'logout').mockImplementation(() => undefined);
+      vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
+      component.revokeSession(ssoSession('bob'));
+      const request = http.expectOne((r) => r.url === '/api/ssoSessions/TGT-bob');
+      expect(request.request.params.get('principal')).toBe('bob');
+      request.flush(null);
+
+      expect(logout).toHaveBeenCalled();
+      http.expectNone('/api/ssoSessions');
+    });
+
+    it('révoquer la session d\'un autre utilisateur ne déconnecte pas l\'agent', () => {
+      const component = setup({ sessions: [ssoSession('alice')] }, 'admin');
+      const logout = vi.spyOn(TestBed.inject(CasAuthService), 'logout').mockImplementation(() => undefined);
+      vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
+      component.revokeSession(ssoSession('alice'));
+      http.expectOne((r) => r.url === '/api/ssoSessions/TGT-alice').flush(null);
+      flushLoad({});
+
+      expect(logout).not.toHaveBeenCalled();
+    });
+  });
+
   it('révoque un appareil de confiance après confirmation, puis recharge', () => {
     const component = setup({ devices: [device('alice')] });
     vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
