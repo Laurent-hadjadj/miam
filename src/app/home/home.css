@@ -71,7 +71,7 @@
 
 .error-banner {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.6rem;
   background: #fdecea;
   color: #7a2a1f;
