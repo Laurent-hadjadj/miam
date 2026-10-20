@@ -44,6 +44,7 @@ _
 - [x] **Sessions SSO** : liste, détail, révocation (vraie déconnexion CAS) ;
 - [x] Suppression d'un compte TOTP **en cascade** (appareils de confiance révoqués avant le compte, pas d'appareil orphelin) ;
 - [x] Suppression de **son propre compte** : déconnexion immédiate de l'application ;
+- [x] Révocation de **sa propre session SSO** : déconnexion immédiate de l'application ;
 - [x] **Journal d'activité** (qui a supprimé quoi, quand) avec double filtre agent / compte concerné ;
 - [x] **Deux thèmes** (orange par défaut, bleu), bascule dynamique, préférence mémorisée en cookie, logos et favicons assortis ;
 - [x] Interface **responsive** (points de rupture Angular Material), cibles tactiles 44 px ;
