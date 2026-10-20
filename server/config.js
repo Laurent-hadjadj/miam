@@ -52,7 +52,7 @@ function parseRetentionMonths(raw) {
  * (le chemin de CAS_BASE_URL, précédé de CAS_PUBLIC_ORIGIN si le navigateur joint le CAS par un autre
  * hôte ou port que MIAM). `/sso` n'apparaît que dans cette valeur par défaut.
  */
-const DEFAULT_CAS_BASE_URL = 'http://localhost:8080/sso';
+const DEFAULT_CAS_BASE_URL = 'http://localhost:8083/sso';
 
 /** Retire les « / » finaux : les adresses CAS sont toujours suivies d'un chemin qui commence par « / ». */
 function trimTrailingSlashes(url) {
@@ -60,7 +60,7 @@ function trimTrailingSlashes(url) {
 }
 
 /**
- * Chemin (contexte) d'une URL CAS : `http://hote:9000/cas` -> `/cas` ; `http://hote:9000` -> vide.
+ * Chemin (contexte) d'une URL CAS : `http://host:8083/cas` -> `/cas` ; `http://host:8083` -> vide.
  * Exportée pour proxy.conf.js, qui en déduit la route CAS à relayer en développement.
  *
  * @param {string} casBaseUrl adresse du CAS (hôte et contexte)
@@ -91,6 +91,7 @@ function loadConfig(env = process.env) {
   const casBaseUrl = trimTrailingSlashes(env.CAS_BASE_URL || DEFAULT_CAS_BASE_URL);
   const config = {
     port: Number(env.PORT) || 80,
+    prefixUrl: `${trimTrailingSlashes(env.PREFIX_URL || '')}`,
     casBaseUrl,
     casActuatorBaseUrl: env.CAS_ACTUATOR_BASE_URL || `${casBaseUrl}/actuator`,
     casBaseUrlPublic:
