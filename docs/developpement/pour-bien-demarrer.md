@@ -100,7 +100,7 @@ _
 > Ce document fait partie de la documentation de MIAM.\
 > Toute suggestion d'amélioration est bienvenue.
 
-🛟 [`Cheklist pour la version RELEASE`](./checklist-release.md) - [`Regroupement-commits`](./regroupement-commits.md) - [`Sécurité`](./securite.md) - [`Test E2E`](./test-e2e.md) - [`Test unitaire`](./test-unitaire.md) - [`Thème et Accessibilité`](./themes-accessibilite.md)
+🛟 [`Cheklist pour la version RELEASE`](./checklist-release.md) - [`Sécurité`](./securite.md) - [`Test E2E`](./test-e2e.md) - [`Test unitaire`](./test-unitaire.md) - [`Thème et Accessibilité`](./themes-accessibilite.md)
 
 [Retour vers la page principale](../README.md)
 

@@ -82,7 +82,7 @@ Chaque `*.spec.ts` est à côté du fichier testé. Les doublures partagées son
 > Ce document fait partie de la documentation de MIAM.\
 > Toute suggestion d'amélioration est bienvenue.
 
-🛟 [`Checklist pour la version RELEASE`](./checklist-release.md) - [`Pour bien démarrer`](./pour-bien-demarrer.md) - [`Sécurité`](./securite.md) - [`Regroupement-commits`](./regroupement-commits.md) - [`Sécurité`](./securite.md) -  [`Test E2E`](./test-e2e.md) - [`Thème et Accessibilité`](./themes-accessibilite.md)
+🛟 [`Checklist pour la version RELEASE`](./checklist-release.md) - [`Pour bien démarrer`](./pour-bien-demarrer.md) - [`Sécurité`](./securite.md) - [`Sécurité`](./securite.md) -  [`Test E2E`](./test-e2e.md) - [`Thème et Accessibilité`](./themes-accessibilite.md)
 
 [Retour vers la page principale](../README.md)
 

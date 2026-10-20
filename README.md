@@ -81,7 +81,6 @@ Détail du démarrage, des variables et de l'enchaînement avec CAS : [Pour bien
 | Sécurité (modèle, durcissements, scan ZAP) | [Sécurité](docs/developpement/securite.md) |
 | Données personnelles, durées, droits, plan d’action | [Conformité RGPD](docs/conformite/rgpd.md) |
 | Thèmes, responsive, accessibilité | [Thèmes et accessibilité](docs/developpement/themes-accessibilite.md) |
-| Regrouper le travail en commits après la revue | [Regroupement des commits](docs/developpement/regroupement-commits.md) |
 | Livrer une version | [Checklist de release](docs/developpement/checklist-release.md) |
 | Variables d'environnement | [Configuration](docs/exploitation/configuration.md) |
 | Docker, journal d'activité, exploitation | [Déploiement](docs/exploitation/deploiement.md) |

@@ -12,7 +12,6 @@ Documentation technique et fonctionnelle de **MIAM — MFA Incident Access Manag
 | 🛠️ Développement | [Tests e2e](developpement/test-e2e.md) | Playwright, simulation réseau, écrire un test |
 | 🛠️ Développement | [Sécurité](developpement/securite.md) | Modèle de menace, durcissements, scan ZAP |
 | 🛠️ Développement | [Thèmes et accessibilité](developpement/themes-accessibilite.md) | Thèmes bleu/orange, points de rupture, WCAG |
-| 🛠️ Développement | [Regroupement des commits](developpement/regroupement-commits.md) | Script de commits thématiques, à lancer après la revue |
 | 🛠️ Développement | [Checklist de release](developpement/checklist-release.md) | Livrer une version |
 | 🛡️ Conformité | [Conformité RGPD](conformite/rgpd.md) | Données traitées, durées, droits, écarts et plan d’action |
 | 🚢 Exploitation | [Configuration](exploitation/configuration.md) | Variables d'environnement |

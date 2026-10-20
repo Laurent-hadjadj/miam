@@ -64,7 +64,7 @@ npx playwright test --ui             # mode interactif
 > Ce document fait partie de la documentation de MIAM.\
 > Toute suggestion d'amélioration est bienvenue.
 
-🛟 [`Checklist pour la version RELEASE`](./checklist-release.md) - [`Pour bien démarrer`](./pour-bien-demarrer.md) - [`Sécurité`](./securite.md) - [`Regroupement-commits`](./regroupement-commits.md) - [`Sécurité`](./securite.md) -  [`Test unitaire`](./test-unitaire.md) - [`Thème et Accessibilité`](./themes-accessibilite.md)
+🛟 [`Checklist pour la version RELEASE`](./checklist-release.md) - [`Pour bien démarrer`](./pour-bien-demarrer.md) - [`Sécurité`](./securite.md) - [`Sécurité`](./securite.md) -  [`Test unitaire`](./test-unitaire.md) - [`Thème et Accessibilité`](./themes-accessibilite.md)
 
 [Retour vers la page principale](../README.md)
 
