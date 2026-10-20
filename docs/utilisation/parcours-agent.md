@@ -95,7 +95,7 @@ Accessible par le bouton **Journal** de la barre d'outils. Tableau *Date · Agen
 | *Filtrer par agent (qui a agi)* | « Qu'a fait tel agent ? » |
 | *Filtrer par compte concerné (qui a subi l'action)* | « Que s'est-il passé sur le compte de tel utilisateur ? » |
 
-Cliquer sur un compte concerné ouvre sa page de détail. Une suppression en masse (sans compte cible) est tracée avec la mention « suppression en masse ».
+Les comptes dans le journal sont affichés en texte brut — le journal est une page de lecture seule, pas de navigation depuis cette page. Une suppression en masse (sans compte cible) est tracée avec la mention « suppression en masse ».
 
 ## 7️⃣ Confort d'usage
 
