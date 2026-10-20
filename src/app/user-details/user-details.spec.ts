@@ -256,4 +256,23 @@ describe('UserDetails', () => {
       .flush(null, { status: 500, statusText: 'Server Error' });
     expect(snack).toHaveBeenCalledWith('Échec de la révocation de la session.');
   });
+
+  it('révoquer SA propre session SSO déconnecte l\'application', () => {
+    const component = setup({ sessions: [ssoSession('alice')] }, 'alice');
+    const logout = vi.spyOn(TestBed.inject(CasAuthService), 'logout').mockImplementation(() => undefined);
+    vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
+    component.revokeSession(ssoSession('alice'));
+    http.expectOne((r) => r.url === '/api/ssoSessions/TGT-alice').flush(null);
+    expect(logout).toHaveBeenCalled();
+  });
+
+  it('révoquer la session d\'un autre utilisateur ne déconnecte pas l\'agent', () => {
+    const component = setup({ sessions: [ssoSession('bob')] }, 'admin');
+    const logout = vi.spyOn(TestBed.inject(CasAuthService), 'logout').mockImplementation(() => undefined);
+    vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
+    component.revokeSession(ssoSession('bob'));
+    http.expectOne((r) => r.url === '/api/ssoSessions/TGT-bob').flush(null);
+    flushLoad({});
+    expect(logout).not.toHaveBeenCalled();
+  });
 });
