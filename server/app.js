@@ -82,17 +82,18 @@ function openAuditLog(dbPath) {
       actor TEXT NOT NULL,
       action TEXT NOT NULL,
       target TEXT,
+      target_display TEXT,
       detail TEXT
     )
   `);
-  const insert = db.prepare('INSERT INTO audit_log (timestamp, actor, action, target, detail) VALUES (?, ?, ?, ?, ?)');
+  const insert = db.prepare('INSERT INTO audit_log (timestamp, actor, action, target, target_display, detail) VALUES (?, ?, ?, ?, ?, ?)');
   const list = db.prepare(
-    'SELECT timestamp, actor, action, target, detail FROM audit_log ORDER BY id DESC LIMIT 2000',
+    'SELECT timestamp, actor, action, target, target_display, detail FROM audit_log ORDER BY id DESC LIMIT 2000',
   );
   const removeOlder = db.prepare('DELETE FROM audit_log WHERE timestamp < ?');
   return {
-    record(actor, action, target, detail, timestamp = new Date().toISOString()) {
-      insert.run(timestamp, actor, action, target || null, detail || null);
+    record(actor, action, target, target_display, detail, timestamp = new Date().toISOString()) {
+      insert.run(timestamp, actor, action, target || null, target_display || null, detail || null);
     },
     entries: () => list.all(),
     /**
@@ -153,10 +154,11 @@ function prepareApiDeleteAudit(req, res, next) {
       ? { actor, action: 'DELETE_TOTP_ACCOUNT', target }
       : { actor, action: 'DELETE_TOTP_ACCOUNT', target: null, detail: 'suppression en masse (tous les comptes)' };
   } else if (resource === 'multifactorTrustedDevices' && target) {
-    req._pendingAudit = { actor, action: 'REVOKE_TRUSTED_DEVICE', target: target.split('@')[0], detail: target };
+    const principal = typeof req.query.principal === 'string' ? req.query.principal : target.split('@')[0];
+    req._pendingAudit = { actor, action: 'REVOKE_TRUSTED_DEVICE', target: principal };
   } else if (resource === 'ssoSessions' && target) {
     const principal = typeof req.query.principal === 'string' ? req.query.principal : null;
-    req._pendingAudit = { actor, action: 'REVOKE_SSO_SESSION', target: principal, detail: target };
+    req._pendingAudit = { actor, action: 'REVOKE_SSO_SESSION', target: principal };
   }
   return next();
 }
@@ -297,6 +299,7 @@ function createApp(config) {
         privacyDpoContact: config.privacyDpoContact,
         privacyLegalBasis: config.privacyLegalBasis,
         auditRetentionMonths: config.auditRetentionMonths,
+        environment: config.environment,
       })};`,
     );
   });
@@ -409,8 +412,8 @@ function createApp(config) {
 
     // Journalisation seulement après un succès (2xx) de l'API Actuator : voir prepareApiDeleteAudit.
     if (req._pendingAudit && upstream.status >= 200 && upstream.status < 300) {
-      const { actor, action, target, detail } = req._pendingAudit;
-      audit.record(actor, action, target, detail);
+      const { actor, action, target, target_display, detail } = req._pendingAudit;
+      audit.record(actor, action, target, target_display, detail);
     }
     if (isTotpRead(req) && contentType.includes('json')) {
       try {
