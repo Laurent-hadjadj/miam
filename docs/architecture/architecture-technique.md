@@ -97,7 +97,7 @@ sequenceDiagram
 - `privacyDpoContact` : Contact du DPO,
 - `privacyLegalBasis` : mission d'intérêt public / intérêt légitime,
 - `auditRetentionMonths` : Durée de rétention des données (6 à 12 mois) conformément au RGPD.
-- `environnement` : défini le type d'environnement cible de MIAM.
+- `environment` : environnement d'exécution (`DEV`, `INT`, `REC`, `PRD`), affiché dans l'en-tête sous forme de badge coloré de MIAM.
 
 Une même image sert tous les environnements, seules les variables d'environnement du conteneur changent. Rien de secret n'y figure.
 
@@ -153,10 +153,11 @@ Une action n'est journalisée que si l'API Actuator répond par un succès (2xx)
 | `timestamp` | Date ISO 8601 (UTC) |
 | `actor` | Identifiant CAS de l'agent (celui de la session) |
 | `action` | `DELETE_TOTP_ACCOUNT`, `REVOKE_TRUSTED_DEVICE` ou `REVOKE_SSO_SESSION` |
-| `target` | Compte concerné (`NULL` pour une suppression en masse) |
-| `detail` | `recordKey` de l'appareil, identifiant du TGT, ou « suppression en masse (tous les comptes) » |
+| `target` | Login du compte concerné |
+| `target_display` | Non utilisé (toujours `NULL`) |
+| `detail` | « suppression en masse (tous les comptes) » pour les suppressions en masse, `NULL` sinon |
 
-Pour une session SSO, l'application ajoute `?principal=<compte>` à la requête (le TGT seul ne permet pas de retrouver le compte) ; le paramètre est ignoré par le serveur CAS.
+Pour les révocations d'appareils de confiance et de sessions SSO, le paramètre `principal` en query string identifie le compte concerné (le TGT seul ne permet pas de le retrouver).
 
 ## 6️⃣ Structure du dépôt
 
