@@ -106,6 +106,8 @@ function loadConfig(env = process.env) {
     appAuthor: env.APP_AUTHOR || '',
     // À défaut de APP_VERSION explicite, reprend la version de package.json.
     appVersion: env.APP_VERSION || require('../package.json').version,
+    // Environnement : DEV (local), INT (intégration), REC (recette), PRD (production).
+    environment: (env.ENVIRONMENT || 'DEV').toUpperCase(),
     // Sortie de `ng build` servie par le module, relative à l'emplacement de ce fichier.
     staticDir: path.join(__dirname, '..', 'dist', 'miam', 'browser'),
     // Pour les trois limites de débit et TRUST_PROXY, `Number(...) || défaut` : une valeur absente, non
