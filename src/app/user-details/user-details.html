@@ -85,7 +85,7 @@
               </button>
             }
             <div class="entry-text">
-              <div class="entry-title">{{ session.authentication_date_formatted | date: 'dd/MM/yyyy HH:mm' }}</div>
+              <div class="entry-title">{{ session.authentication_date_formatted | date: 'dd/MM/yyyy HH:mm' : 'UTC' }}</div>
               <div class="entry-line">{{ sessionServices(session) }}</div>
             </div>
           </div>
