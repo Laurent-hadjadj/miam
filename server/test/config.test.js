@@ -127,3 +127,10 @@ test('contexte CAS : tout découle de CAS_BASE_URL (/cas, /user, aucun contexte)
   assert.equal(explicite.casActuatorBaseUrl, 'http://interne:9001/gestion', 'une valeur explicite l\'emporte');
   assert.equal(explicite.casBaseUrlPublic, 'https://sso.exemple.fr/cas');
 });
+
+test('ENVIRONMENT : DEV par défaut, surcharge possible', () => {
+  assert.equal(loadConfig({ ...SECRETS }).environment, 'DEV');
+  assert.equal(loadConfig({ ...SECRETS, ENVIRONMENT: 'INT' }).environment, 'INT');
+  assert.equal(loadConfig({ ...SECRETS, ENVIRONMENT: 'rec' }).environment, 'REC');
+  assert.equal(loadConfig({ ...SECRETS, ENVIRONMENT: 'prd' }).environment, 'PRD');
+});
