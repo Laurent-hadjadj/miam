@@ -57,7 +57,7 @@ describe('Journal', () => {
     expect(component.filteredEntries()).toHaveLength(2);
   });
 
-  it("rend un tableau lisible : libellés d'action, cible cliquable, ligne vide pour la suppression en masse", async () => {
+  it("rend un tableau lisible : libellés d'action, cible en texte brut, ligne vide pour la suppression en masse", async () => {
     const { component } = setup([entry('alice', 'bob', 'REVOKE_TRUSTED_DEVICE'), entry('alice', null)]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -68,10 +68,10 @@ describe('Journal', () => {
     expect(rows[0].textContent).toContain('Révocation appareil de confiance');
     expect(rows[0].textContent).toContain('alice');
 
-    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    const target = rows[0].querySelector('button, a') as HTMLElement;
-    target.click();
-    expect(navigate).toHaveBeenCalledWith(['/users', 'bob']);
+    // La cible est un simple <span> (texte brut, pas cliquable)
+    const target = rows[0].querySelector('td:nth-child(4) span') as HTMLElement;
+    expect(target).toBeTruthy();
+    expect(target.textContent).toContain('bob');
     expect(component.filteredEntries()).toHaveLength(2);
   });
 
