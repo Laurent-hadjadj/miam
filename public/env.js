@@ -17,4 +17,5 @@ window.__env = {
   privacyDpoContact: '',
   privacyLegalBasis: '',
   auditRetentionMonths: 12,
+  environment: 'DEV',
 };
