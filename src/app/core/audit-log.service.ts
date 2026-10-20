@@ -12,6 +12,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
+import { PREFIX_URL } from './api-config';
 import { AuditLogEntry } from './models';
 
 interface AuditLogResponse {
@@ -36,6 +37,6 @@ export class AuditLogService {
    * @returns les entrées telles que fournies par le BFF, ou `[]` si la réponse n'en contient pas.
    */
   getAll(): Observable<AuditLogEntry[]> {
-    return this.http.get<AuditLogResponse>('/bff/audit-log').pipe(map((response) => response.entries ?? []));
+    return this.http.get<AuditLogResponse>(`${PREFIX_URL}/bff/audit-log`).pipe(map((response) => response.entries ?? []));
   }
 }
