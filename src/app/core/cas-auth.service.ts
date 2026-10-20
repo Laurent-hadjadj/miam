@@ -13,14 +13,14 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
-import { CAS_BASE_URL } from './api-config';
+import { CAS_BASE_URL, PREFIX_URL } from './api-config';
 
 /** Clé du miroir d'affichage dans `sessionStorage` (propre à l'onglet, effacé à sa fermeture). */
 const SESSION_KEY = 'totp-admin-cas-session';
 /** Ouverture de la session applicative : échange d'un ticket CAS contre une session BFF. */
-const BFF_SESSION_URL = '/bff/session';
+const BFF_SESSION_URL = `${PREFIX_URL}/bff/session`;
 /** Fermeture de la session BFF. */
-const BFF_LOGOUT_URL = '/bff/logout';
+const BFF_LOGOUT_URL = `${PREFIX_URL}/bff/logout`;
 
 /** `admin` : lecture, suppression, journal. `consultation` : lecture seule (attribué par les groupes AD, voir server/roles.js). */
 export type Role = 'admin' | 'consultation';
