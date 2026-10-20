@@ -30,7 +30,7 @@
 > [!TIP]
 > On considère que vous avez un repos avec la version du serveur CAS compilable et un serveur mongodb/postgreSQL sur votre poste.
 >
-> Le serveur CAS est accessible sur `http://localhost:8080` et le serveur, par example, MongoDB sur le port 27017.
+> Le serveur CAS est accessible sur `http://localhost:8083` et le serveur, par example, MongoDB sur le port 27017.
 >
 > La configuration du serveur CAS active MFA (mfa_gauth), la connexion JDBC (mongoDb, Oracle, postgreSQL,...), l'enregistrement TOTP et l'appareil de confiance enregistré dans la base de données.
 
@@ -38,11 +38,11 @@ Trois processus, dans cet ordre :
 
 ```bash
 # 1. CAS + MongoDB (bac à sable)
-cd ../CAS/bac-a-sable
-./start-mongo.sh && ./start-cas.sh        # CAS prêt sur :8080 (le premier chargement de /login est lent)
+cd CAS/bac-a-sable
+./start-mongo.sh && ./start-cas.sh        # CAS prêt sur :8083 (le premier chargement de /login est lent)
 
 # 2. Module BFF (port 80 par défaut, 3000 en local)
-cd ../../../miam
+cd ../../miam
 cp .env.example .env                       # puis renseigner ACTUATOR_*, SESSION_SECRET, ROLE_ADMIN_GROUPS ; sur un poste : NODE_ENV=development et PORT=3000 (le 80 est souvent déjà pris)
 npm run bff
 
