@@ -26,7 +26,7 @@ MIAM est un service CAS comme un autre. Le MFA y est **imposé** quel que soit l
   "@class": "org.apereo.cas.services.CasRegisteredService",
   "serviceId": "^https://miam.exemple.fr(/.*)?$",
   "name": "miam",
-  "id": 10,
+  "id": 999,
   "evaluationOrder": 0,
   "multifactorAuthenticationPolicy": {
     "@class": "org.apereo.cas.services.DefaultRegisteredServiceMultifactorPolicy",
@@ -45,7 +45,7 @@ MIAM est un service CAS comme un autre. Le MFA y est **imposé** quel que soit l
 
 > [!TIP]
 > Fichier prêt à déposer dans le dossier des services de CAS : [`cas/services/MIAM-999.json`](../../cas/services/MIAM-999.json).\
-> Remplacer `miam.exemple.fr` dans `serviceId` par l'URL publique de MIAM (dans le JSON, chaque point de l'expression régulière s'écrit `\\.` : `miam\\.exemple\\.fr`) ; en développement, `^http://localhost:(4200|8081)(/.*)?$`.\
+> Remplacer `miam.exemple.fr` dans `serviceId` par l'URL publique de MIAM (dans le JSON, chaque point de l'expression régulière s'écrit `\\.` : `miam\\.exemple\\.fr`) ; en développement, `^http://localhost:(4200|8083)(/.*)?$`.\
 > Le dépôt CAS lit ces fichiers au démarrage ou à chaud selon sa configuration (`cas.service-registry.*`).
 
 _
@@ -175,16 +175,16 @@ _
 
 _
 > [!NOTE]
-> Une modification de groupe dans l'annuaire s'applique à la **connexion suivante** : le profil est fixé à l'ouverture de la session (8 h maximum). Pour retirer immédiatement un droit, révoquer aussi la session SSO de l'utiliateur.
+> Une modification de groupe dans l'annuaire s'applique à la **connexion suivante** : le profil est fixé à l'ouverture de la session (8 h maximum). Pour retirer immédiatement un droit, révoquer aussi la session SSO de l’utilisateur.
 
 ### 🫧 Groupes à créer dans l'annuaire
 
 | Groupe | Profil | Membres | Remarque |
 | --- | --- | --- | --- |
-| `GRP_MIAM_ADMIN` | Administration | Agents habilités à supprimer / révoquer et à lire le journal | Population restreinte, revue régulière |
-| `GRP_MIAM_CONSULT` | Consultation | Agents en lecture seule (supervision, support de niveau 1) | Facultatif au démarrage |
+| `GRP_MIAM_ADMIN` | Administration | Utilisateurs habilités à supprimer / révoquer et à lire le journal | Population restreinte, revue régulière |
+| `GRP_MIAM_CONSULT` | Consultation | utilisateurs en lecture seule (supervision, support de niveau 1) | Facultatif au démarrage |
 
-Un agent présent dans les deux groupes a le profil le plus élevé (administration). Les groupes doivent être **visibles par le serveur CAS** dans `memberOf` : si le serveur CAS lit déjà les groupes AD/openLDAP (pour le déclencheur MFA global, par exemple), il n'y a rien d'autre à brancher que la vérification de l'attribut vers le service MIAM.
+Un utilisateur présent dans les deux groupes a le profil le plus élevé (administration). Les groupes doivent être **visibles par le serveur CAS** dans `memberOf` : si le serveur CAS lit déjà les groupes AD/openLDAP (pour le déclencheur MFA global, par exemple), il n'y a rien d'autre à brancher que la vérification de l'attribut vers le service MIAM.
 
 Texte type de la demande à l'équipe en charge de l'annuaire d'entreprise (AD/OpenLDAP) :
 
