@@ -172,7 +172,7 @@ export class UserDetails {
       })
       .pipe(
         filter(Boolean),
-        switchMap(() => this.trustedDeviceService.revoke(device.recordKey)),
+        switchMap(() => this.trustedDeviceService.revoke(device.recordKey, device.principal)),
       )
       .subscribe({
         next: () => {
@@ -203,6 +203,11 @@ export class UserDetails {
       )
       .subscribe({
         next: () => {
+          if (session.authenticated_principal === this.casAuth.username()) {
+            this.notify('Votre session SSO a été révoquée - déconnexion en cours.');
+            this.casAuth.logout();
+            return;
+          }
           this.notify('Session révoquée.');
           this.reload();
         },
