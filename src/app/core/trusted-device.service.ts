@@ -10,7 +10,7 @@
  */
 
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
@@ -51,8 +51,15 @@ export class TrustedDeviceService {
    *
    * @param recordKey clé de l'appareil (champ `recordKey` de TrustedDevice), pas le nom. Elle est
    *   encodée dans l'URL car elle contient des caractères réservés (`@`, espaces, parfois `/`).
+   * @param principal identifiant de l'utilisateur, passé en query string pour l'audit (le BFF l'utilise
+   *   pour journaliser le compte concerné au lieu du recordKey).
    */
-  revoke(recordKey: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${encodeURIComponent(recordKey)}`);
+  revoke(recordKey: string, principal?: string): Observable<void> {
+    const url = `${this.baseUrl}/${encodeURIComponent(recordKey)}`;
+    if (principal) {
+      const params = new HttpParams().set('principal', principal);
+      return this.http.delete<void>(url, { params });
+    }
+    return this.http.delete<void>(url);
   }
 }
