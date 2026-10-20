@@ -12,7 +12,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { ThemeService } from '../core/theme.service';
 import { ResponsiveService } from '../core/responsive.service';
-import { LOGO_URL } from '../core/api-config';
+import { LOGO_URL, ENVIRONMENT } from '../core/api-config';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -73,5 +73,23 @@ export class BrandHeader {
   protected readonly miamLogoUrl = computed(() => {
     const logos = MIAM_LOGOS[this.theme()];
     return this.isCompact() ? logos.icon : logos.horizontal;
+  });
+
+  /** Environnement d'exécution (DEV, INT, REC, PRD). */
+  protected readonly env = ENVIRONMENT;
+
+  /** Label court du badge d'environnement. */
+  protected readonly envLabel = computed(() => {
+    switch (this.env) {
+      case 'DEV': return 'DEV';
+      case 'INT': return 'INT';
+      case 'REC': return 'REC';
+      case 'PRD': return 'PRD';
+    }
+  });
+
+  /** Classe CSS du badge : `env-dev`, `env-int`, `env-rec`, `env-prd`. */
+  protected readonly envClass = computed(() => {
+    return `env-${this.env.toLowerCase()}`;
   });
 }

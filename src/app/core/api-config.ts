@@ -35,6 +35,7 @@ declare global {
       privacyDpoContact?: string;
       privacyLegalBasis?: string;
       auditRetentionMonths?: number;
+      environment?: 'DEV' | 'INT' | 'REC' | 'PRD';
     };
   }
 }
@@ -88,3 +89,6 @@ export const AUDIT_RETENTION_MONTHS = window.__env?.auditRetentionMonths || 12;
 
 /** Ajout d'un prefix utile avec Traefik + docker sur les infra d'entreprise. */
 export const PREFIX_URL = window.__env?.prefixUrl || '';
+
+/** Environnement d'exécution : DEV (local), INT (intégration), REC (recette), PRD (production). */
+export const ENVIRONMENT = (window.__env?.environment ?? 'DEV') as 'DEV' | 'INT' | 'REC' | 'PRD';

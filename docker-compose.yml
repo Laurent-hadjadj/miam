@@ -44,6 +44,8 @@ services:
       PRIVACY_CONTROLLER: ${PRIVACY_CONTROLLER:-}
       PRIVACY_DPO_CONTACT: ${PRIVACY_DPO_CONTACT:-}
       PRIVACY_LEGAL_BASIS: ${PRIVACY_LEGAL_BASIS:-}
+      # Environnement d'exécution : DEV, INT, REC, PRD (badge affiché dans l'en-tête).
+      ENVIRONMENT: ${ENVIRONMENT:-DEV}
     volumes:
       # Journal d'activité SQLite - survit aux recréations du conteneur.
       - miam-audit-log:/app/server/data

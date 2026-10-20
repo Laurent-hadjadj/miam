@@ -46,6 +46,9 @@ ENV LOGO_URL=
 # auteur "Laurent HADJADJ", version reprise de package.json.
 ENV APP_AUTHOR=
 ENV APP_VERSION=
+# Environnement d'exécution : DEV (local), INT (intégration), REC (recette), PRD (production).
+# Affiché dans l'en-tête de l'application (badge coloré à côté du logo MIAM).
+ENV ENVIRONMENT=DEV
 
 # Journal d'activité SQLite (server/data/audit.db) - à monter en volume pour
 # survivre aux redémarrages/recréations du conteneur (ex. `docker run -v

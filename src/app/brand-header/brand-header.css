@@ -51,6 +51,42 @@
   height: 64px;
 }
 
+/* Badge d'environnement (DEV, INT, REC, PRD) : juste à côté du logo MIAM. */
+.env-badge {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: 0.25em 0.6em;
+  border-radius: 4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.env-dev {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.env-int {
+  background-color: #e3f2fd;
+  color: #00445b;
+}
+
+.env-rec {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.env-prd {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.brand-header.compact .env-badge {
+  display: none;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
