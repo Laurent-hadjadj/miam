@@ -302,7 +302,7 @@ describe('UserList', () => {
     const component = setup({ devices: [device('alice')] });
     vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
     component.revokeDevice(device('alice'));
-    http.expectOne({ method: 'DELETE', url: '/api/multifactorTrustedDevices/alice%40Poste%40fp' }).flush(null);
+    http.expectOne((r) => r.url === '/api/multifactorTrustedDevices/alice%40Poste%40fp' && r.params.get('principal') === 'alice').flush(null);
     flushLoad({});
   });
 
@@ -311,7 +311,7 @@ describe('UserList', () => {
     vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(true));
     component.revokeDevice(device('alice'));
     http
-      .expectOne({ method: 'DELETE', url: '/api/multifactorTrustedDevices/alice%40Poste%40fp' })
+      .expectOne((r) => r.url === '/api/multifactorTrustedDevices/alice%40Poste%40fp' && r.params.get('principal') === 'alice')
       .flush(null, { status: 500, statusText: 'Server Error' });
     expect(snack).toHaveBeenCalledWith("Échec de la révocation de l'appareil.");
   });
