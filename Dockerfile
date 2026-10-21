@@ -2,7 +2,7 @@
 
 # ---- Build ----
 # Angular CLI 22 exige Node >= 24.15.0 (vérifié en session : 24.12.0 insuffisant).
-FROM node:24-alpine AS build
+FROM node:24 AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -17,7 +17,7 @@ RUN npx ng build --configuration production
 # sert l'appli ET proxy /api/* vers l'API actuator en y attachant l'Authorization
 # côté serveur, derrière une session ouverte uniquement après validation
 # réelle d'un ticket CAS (voir server/index.js et l'audit de sécurité).
-FROM node:24-alpine AS runtime
+FROM node:24 AS runtime
 WORKDIR /app
 
 COPY package.json package-lock.json ./
