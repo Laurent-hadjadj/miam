@@ -4,6 +4,15 @@ Toutes les évolutions notables de MIAM sont documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.1.1] - 2026-10-21
+
+### Corrigé
+
+- **Tests unitaires — URLs d'API incohérentes** : les tests de `TrustedDeviceService` attendaient `/bff/api/...` au lieu de `/api/...` (valeur de `API_BASE_URL`). Corrigé ;
+- **Tests unitaires — query string `principal` manquante** : les tests de `user-details` et `user-list` qui mockaient `DELETE /api/multifactorTrustedDevices/{key}` ne tenaient pas compte du paramètre `?principal=` ajouté par `TrustedDeviceService.revoke()`. Remplacé les `expectOne` par des predicates vérifiant URL + `principal` ;
+- **Tests E2E — `addCookies` timeout** : les 3 échecs sur `accessibility.spec.ts` étaient dus au serveur Angular non démarré (`localhost:4200`). Les tests passent en lançant `ng serve` avant `npm run e2e` ;
+- **Sécurité — npm audit** : 2 des 4 failles corrigées par `npm audit fix` (`@modelcontextprotocol/server` dans `@angular/cli`, transport HTTP / fuite mémoire / bearer auth). Les 2 restantes (`vite`/`launch-editor` via `@angular/build`) sont sans impact en production (usage développement uniquement) ;
+
 ## [1.1.0] - 2026-10-20
 
 ### Corrigé
