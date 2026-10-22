@@ -8,6 +8,7 @@
  * toute ouverture de port. Ce fichier ne contient aucune logique métier : tout est dans app.js.
  */
 const path = require('node:path');
+const logger = require('./logger');
 
 // Chargement explicite du .env (complément à --env-file-if-exists du script npm) :
 // assure que PREFIX_URL et les autres variables sont disponibles sur toutes les versions de Node.
@@ -15,12 +16,11 @@ try {
   const dotenv = require('dotenv');
   dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 } catch (err) {
-  logger.warn('[bff] dotenv non disponible ou .env absent', err);
+  logger.debug('[bff] dotenv non disponible ou .env absent', err);
 }
 
 const { loadConfig } = require('./config');
 const { createApp } = require('./app');
-const logger = require('./logger');
 
 const config = loadConfig();
 const { app, audit } = createApp(config);
