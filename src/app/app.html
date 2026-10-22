@@ -3,6 +3,7 @@
   @if (authService.isAuthenticated()) {
     <mat-toolbar color="primary" role="banner">
       <img class="toolbar-logo" [src]="logoUrl()" alt="MIAM - MFA Incident Access Management" />
+      <span class="env-badge" [class]="envClass()">{{ envLabel() }}</span>
       @if (!isCompact()) {
         <span class="toolbar-title">Administration TOTP / appareils de confiance</span>
       }

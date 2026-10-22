@@ -23,6 +23,7 @@ import { ThemeSwitch } from './theme-switch/theme-switch';
 import { ThemeService } from './core/theme.service';
 import { ResponsiveService } from './core/responsive.service';
 import { Notification } from './notification/notification';
+import { ENVIRONMENT } from './core/api-config';
 
 /**
  * Composant racine : squelette de l'application (barre d'outils, zone de contenu routée, pied de page,
@@ -103,4 +104,22 @@ export class App {
   logout(): void {
     this.authService.logout();
   }
+
+  /** Environnement d'exécution (DEV, INT, REC, PRD). */
+  protected readonly env = ENVIRONMENT;
+
+  /** Label court du badge d'environnement. */
+  protected readonly envLabel = computed(() => {
+    switch (this.env) {
+      case 'DEV': return 'DEV';
+      case 'INT': return 'INT';
+      case 'REC': return 'REC';
+      case 'PRD': return 'PRD';
+    }
+  });
+
+  /** Classe CSS du badge : `env-dev`, `env-int`, `env-rec`, `env-prd`. */
+  protected readonly envClass = computed(() => {
+    return `env-${this.env.toLowerCase()}`;
+  });
 }

@@ -19,6 +19,40 @@
   width: auto;
 }
 
+/* Badge d'environnement dans la barre d'outils connectée. */
+.toolbar-logo + .env-badge,
+.mat-toolbar .env-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.env-dev {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.env-int {
+  background-color: #e3f2fd;
+  color: #00445b;
+}
+
+.env-rec {
+  background-color: #fff3e0;
+  color: #b84304;
+}
+
+.env-prd {
+  background-color: #ffebee;
+  color: #9b0606;
+}
+
 .toolbar-title {
   margin-left: 1rem;
   white-space: nowrap;
