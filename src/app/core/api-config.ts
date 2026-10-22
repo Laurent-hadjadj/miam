@@ -73,7 +73,7 @@ export const LOGO_URL = window.__env?.logoUrl || '';
 /** Auteur affiché dans le pied de page - personnalisable par environnement, même mécanique que LOGO_URL. */
 export const APP_AUTHOR = window.__env?.appAuthor || 'Laurent HADJADJ';
 /** Version affichée dans le pied de page - personnalisable par environnement, même mécanique que LOGO_URL. */
-export const APP_VERSION = window.__env?.appVersion || '1.0.0';
+export const APP_VERSION = window.__env?.appVersion || '1.2.0';
 
 /**
  * Informations RGPD de la page /informations, renseignées par l'organisation qui déploie MIAM
