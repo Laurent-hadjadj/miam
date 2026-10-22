@@ -299,6 +299,7 @@ function createApp(config) {
         privacyDpoContact: config.privacyDpoContact,
         privacyLegalBasis: config.privacyLegalBasis,
         auditRetentionMonths: config.auditRetentionMonths,
+        appVersion: config.appVersion,
         environment: config.environment,
       })};`,
     );
