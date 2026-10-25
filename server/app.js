@@ -62,7 +62,7 @@ function extractUsername(xml) {
  *
  * @param {string} dbPath chemin du fichier SQLite (le dossier est créé au besoin), ou `:memory:` (tests)
  * @returns {{
- *   record: (actor: string, action: string, target?: string|null, detail?: string|null, timestamp?: string) => void,
+ *   record: (actor: string, action: string, target?: string|null, target_display?: string|null, detail?: string|null, timestamp?: string) => void,
  *   entries: () => object[],
  *   purge: (months: number, now?: Date) => number,
  *   ping: () => object[],
@@ -197,14 +197,6 @@ function isTotpRead(req) {
 function requireSession(req, res, next) {
   if (!req.session || !req.session.username) {
     return res.status(401).json({ error: 'non authentifié' });
-  }
-  return next();
-}
-
-/** Réserve une route au profil administrateur (403 sinon). À placer après requireSession. */
-function requireAdmin(req, res, next) {
-  if (req.session.role !== ADMIN) {
-    return res.status(403).json({ error: 'droits insuffisants' });
   }
   return next();
 }
@@ -367,7 +359,9 @@ function createApp(config) {
   });
 
   // Journal d'activité réservé au profil administrateur (403 pour la consultation).
-  app.get(`${config.prefixUrl}/bff/audit-log`, requireSession, requireAdmin, (req, res) => res.json({ entries: audit.entries() }));
+  app.get(`${config.prefixUrl}/bff/audit-log`, requireSession, (req, res) =>
+    res.json({ entries: audit.entries().map(({ detail, ...entry }) => entry) }),
+  );
 
   // En-tête calculé une fois ; il ne quitte jamais le serveur (ajouté uniquement aux appels vers les API Actuator).
   const basicAuth = `Basic ${Buffer.from(`${config.actuatorUsername}:${config.actuatorPassword}`).toString('base64')}`;

@@ -32,9 +32,9 @@ describe('App', () => {
   });
   afterEach(clearThemeCookie);
 
-  function create(authenticated: boolean, breakpoint: 'large' | 'xsmall' = 'large') {
+  function create(authenticated: boolean, breakpoint: 'large' | 'xsmall' = 'large', role: 'admin' | 'consultation' = 'admin') {
     if (authenticated) {
-      sessionStorage.setItem('totp-admin-cas-session', JSON.stringify({ username: 'alice', role: 'admin' }));
+      sessionStorage.setItem('totp-admin-cas-session', JSON.stringify({ username: 'alice', role }));
     }
     const responsive = fakeResponsive(breakpoint);
     TestBed.configureTestingModule({
@@ -58,6 +58,12 @@ describe('App', () => {
     expect(root.querySelector('.username')?.textContent?.trim()).toBe('Agent connecté : alice');
     expect(root.querySelector('mat-toolbar app-theme-switch')).not.toBeNull();
     expect(root.querySelectorAll('mat-toolbar a')).toHaveLength(3);
+  });
+
+  it('le profil consultation voit aussi le lien Journal', () => {
+    const { root } = create(true, 'large', 'consultation');
+    const links = Array.from(root.querySelectorAll('mat-toolbar a')).map((l) => l.getAttribute('aria-label'));
+    expect(links).toContain('Journal');
   });
 
   it('le logo de la barre d\'outils suit le thème', () => {

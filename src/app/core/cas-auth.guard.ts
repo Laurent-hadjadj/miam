@@ -33,19 +33,3 @@ export const casAuthGuard: CanActivateFn = () => {
 
   return auth.isAuthenticated() || router.createUrlTree(['/']);
 };
-
-/**
- * Pages réservées au profil administrateur (journal d'activité) : les autres profils retournent à la liste.
- *
- * @returns `true` pour un administrateur ; l'`UrlTree` de l'accueil sans session ; celui de la liste
- *   `/users` pour un profil consultation.
- */
-export const adminGuard: CanActivateFn = () => {
-  const auth = inject(CasAuthService);
-  const router = inject(Router);
-
-  if (!auth.isAuthenticated()) {
-    return router.createUrlTree(['/']);
-  }
-  return auth.isAdmin() || router.createUrlTree(['/users']);
-};

@@ -13,15 +13,14 @@
 import { Routes } from '@angular/router';
 import { Home } from './home/home';
 import { LoggedOut } from './logged-out/logged-out';
-import { adminGuard, casAuthGuard } from './core/cas-auth.guard';
+import { casAuthGuard } from './core/cas-auth.guard';
 
 /**
  * Table des routes de l'application.
  *
  * - Publiques : accueil (point de départ de la connexion CAS), informations RGPD, confirmation de
  *   déconnexion.
- * - `users` et `users/:username` : exigent une session (`casAuthGuard`), profils admin et consultation.
- * - `journal` : réservé au profil administrateur (`adminGuard`).
+ * - `users`, `users/:username` et `journal` : exigent une session (`casAuthGuard`), profils admin et consultation.
  * - Toute autre URL redirige vers l'accueil.
  *
  * Les gardes ne servent qu'à guider la navigation : l'autorisation réelle est appliquée par le
@@ -34,6 +33,6 @@ export const routes: Routes = [
   { path: 'deconnexion', component: LoggedOut, title: 'Déconnexion réussie - MIAM' },
   { path: 'users', title: 'Utilisateurs - MIAM', loadComponent: () => import('./user-list/user-list').then((m) => m.UserList), canActivate: [casAuthGuard] },
   { path: 'users/:username', title: 'Détail utilisateur - MIAM', loadComponent: () => import('./user-details/user-details').then((m) => m.UserDetails), canActivate: [casAuthGuard] },
-  { path: 'journal', title: "Journal d'activité - MIAM", loadComponent: () => import('./journal/journal').then((m) => m.Journal), canActivate: [adminGuard] },
+  { path: 'journal', title: "Journal d'activité - MIAM", loadComponent: () => import('./journal/journal').then((m) => m.Journal), canActivate: [casAuthGuard] },
   { path: '**', redirectTo: '' },
 ];

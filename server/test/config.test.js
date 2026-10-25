@@ -40,7 +40,7 @@ test('lit la configuration depuis les variables d\'environnement', () => {
 test('valeurs par défaut non secrètes : port 80, CAS local, cookie non sécurisé', () => {
   const config = loadConfig({ ...SECRETS });
   assert.equal(config.port, 80);
-  assert.equal(config.casActuatorBaseUrl, 'http://localhost:8080/sso/actuator');
+  assert.equal(config.casActuatorBaseUrl, 'http://localhost:8083/sso/actuator');
   assert.equal(config.casBaseUrlPublic, '/sso');
   assert.equal(config.cookieSecure, false);
   assert.match(config.appVersion, /^\d+\.\d+\.\d+/);

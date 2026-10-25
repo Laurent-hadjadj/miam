@@ -18,7 +18,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
-import { adminGuard, casAuthGuard } from './cas-auth.guard';
+import { casAuthGuard } from './cas-auth.guard';
 import { CasAuthService } from './cas-auth.service';
 
 function runGuard(authenticated: boolean): boolean | UrlTree {
@@ -38,34 +38,6 @@ describe('casAuthGuard', () => {
   it('renvoie vers l\'accueil sans session, sans déclencher de connexion CAS automatique', () => {
     const result = runGuard(false);
     expect(result).toBeInstanceOf(UrlTree);
-    expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/');
-  });
-});
-
-describe('adminGuard', () => {
-  function run(authenticated: boolean, admin: boolean): boolean | UrlTree {
-    TestBed.configureTestingModule({
-      providers: [
-        provideRouter([]),
-        { provide: CasAuthService, useValue: { isAuthenticated: () => authenticated, isAdmin: () => admin } },
-      ],
-    });
-    return TestBed.runInInjectionContext(
-      () => adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as boolean | UrlTree,
-    );
-  }
-
-  it('laisse passer un administrateur', () => {
-    expect(run(true, true)).toBe(true);
-  });
-
-  it('renvoie un profil consultation vers la liste', () => {
-    const result = run(true, false);
-    expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/users');
-  });
-
-  it("renvoie un visiteur sans session vers l'accueil", () => {
-    const result = run(false, false);
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/');
   });
 });

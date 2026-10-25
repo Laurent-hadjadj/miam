@@ -94,6 +94,7 @@ async function startBff(overrides = {}) {
   fs.writeFileSync(path.join(staticDir, 'index.html'), '<html>SPA</html>');
   const casUrl = `http://127.0.0.1:${cas.port}`;
   const { app, audit } = createApp({
+    prefixUrl: '',
     casActuatorBaseUrl: `${casUrl}${CAS_CTX}/actuator`,
     casBaseUrl: `${casUrl}${CAS_CTX}`,
     casBaseUrlPublic: CAS_CTX,
@@ -305,13 +306,30 @@ test('journal : une suppression réussie est tracée avec l\'agent réel, les tr
     assert.equal((await bff.request('DELETE', '/api/gauthCredentialRepository')).status, 200);
 
     const { entries } = await (await bff.request('GET', '/bff/audit-log')).json();
-    const summary = entries.reverse().map(({ actor, action, target, detail }) => ({ actor, action, target, detail }));
+    const summary = entries.reverse().map(({ actor, action, target }) => ({ actor, action, target }));
     assert.deepEqual(summary, [
-      { actor: 'alice', action: 'DELETE_TOTP_ACCOUNT', target: 'bob', detail: null },
-      { actor: 'alice', action: 'REVOKE_TRUSTED_DEVICE', target: 'carol', detail: recordKey },
-      { actor: 'alice', action: 'REVOKE_SSO_SESSION', target: 'dave', detail: 'TGT-1' },
-      { actor: 'alice', action: 'DELETE_TOTP_ACCOUNT', target: null, detail: 'suppression en masse (tous les comptes)' },
+      { actor: 'alice', action: 'DELETE_TOTP_ACCOUNT', target: 'bob' },
+      { actor: 'alice', action: 'REVOKE_TRUSTED_DEVICE', target: 'carol' },
+      { actor: 'alice', action: 'REVOKE_SSO_SESSION', target: 'dave' },
+      { actor: 'alice', action: 'DELETE_TOTP_ACCOUNT', target: null },
     ]);
+    // Le détail reste en base (traçabilité d'exploitation) mais n'est jamais exposé au navigateur.
+    assert.equal(bff.audit.entries()[0].detail, 'suppression en masse (tous les comptes)');
+  } finally {
+    await bff.stop();
+  }
+});
+
+test('journal : la lecture ne renvoie jamais le champ detail (anciennes entrées : clé d\'appareil, TGT)', async () => {
+  const bff = await startBff();
+  try {
+    await bff.login();
+    bff.audit.record('alice', 'REVOKE_SSO_SESSION', 'dave', null, 'TGT-ancien-secret');
+    const response = await bff.request('GET', '/bff/audit-log');
+    const text = await response.text();
+    assert.equal(response.status, 200);
+    assert.doesNotMatch(text, /TGT-ancien-secret|"detail"/);
+    assert.equal(JSON.parse(text).entries[0].target, 'dave');
   } finally {
     await bff.stop();
   }
@@ -416,9 +434,9 @@ test('purge du journal : supprime seulement les entrées plus anciennes que la d
   const bff = await startBff();
   try {
     const maintenant = new Date('2026-10-14T12:00:00Z');
-    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'ancienne', null, '2025-01-01T00:00:00.000Z');
-    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'moyenne', null, '2025-11-01T00:00:00.000Z');
-    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'recente', null, '2026-10-01T00:00:00.000Z');
+    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'ancienne', null, null, '2025-01-01T00:00:00.000Z');
+    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'moyenne', null, null, '2025-11-01T00:00:00.000Z');
+    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'recente', null, null, '2026-10-01T00:00:00.000Z');
 
     // Les horodatages sont fournis à `record` pour fixer l'âge des entrées sans dépendre de l'horloge.
     // 12 mois avant le 14/10/2026 = 14/10/2025 : seule l'entrée de janvier 2025 disparaît.
@@ -451,7 +469,7 @@ test('habilitations : l\'administrateur lit, supprime et consulte le journal', a
   }
 });
 
-test('habilitations : le profil consultation lit mais ne supprime ni ne voit le journal (403)', async () => {
+test('habilitations : le profil consultation lit et consulte le journal, sans pouvoir supprimer', async () => {
   const bff = await startBff(HABILITATIONS);
   try {
     const login = await bff.login('ST-lecture');
@@ -465,7 +483,7 @@ test('habilitations : le profil consultation lit mais ne supprime ni ne voit le 
     assert.equal(bff.cas.received.length, casAvant, 'la suppression ne part jamais vers CAS');
     assert.equal(bff.audit.entries().length, 0, 'et n\'est pas journalisée');
 
-    assert.equal((await bff.request('GET', '/bff/audit-log')).status, 403);
+    assert.equal((await bff.request('GET', '/bff/audit-log')).status, 200);
     assert.equal((await bff.request('GET', '/bff/session')).status, 200);
   } finally {
     await bff.stop();
@@ -540,8 +558,8 @@ test('build de production : aucun script inline ni feuille de style chargée par
 test('purge du journal : fin de mois (31 août - 6 mois = 28 février), sans déborder sur mars', async () => {
   const bff = await startBff();
   try {
-    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'avant', null, '2027-02-27T23:59:59.000Z');
-    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'apres', null, '2027-02-28T13:00:00.000Z');
+    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'avant', null, null, '2027-02-27T23:59:59.000Z');
+    bff.audit.record('agent', 'DELETE_TOTP_ACCOUNT', 'apres', null, null, '2027-02-28T13:00:00.000Z');
     // 2027 n'est pas bissextile : la limite est le 28/02/2027 à 12:00, jamais le 03/03.
     assert.equal(bff.audit.purge(6, new Date('2027-08-31T12:00:00Z')), 1);
     assert.deepEqual(bff.audit.entries().map((e) => e.target), ['apres']);

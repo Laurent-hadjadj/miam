@@ -13,12 +13,10 @@
         <mat-icon aria-hidden="true">people</mat-icon>
         @if (!isCompact()) { Utilisateurs }
       </a>
-      @if (authService.isAdmin()) {
-        <a mat-button routerLink="/journal" routerLinkActive="active-link" ariaCurrentWhenActive="page" title="Journal" aria-label="Journal">
-          <mat-icon aria-hidden="true">history</mat-icon>
-          @if (!isCompact()) { Journal }
-        </a>
-      }
+      <a mat-button routerLink="/journal" routerLinkActive="active-link" ariaCurrentWhenActive="page" title="Journal" aria-label="Journal">
+        <mat-icon aria-hidden="true">history</mat-icon>
+        @if (!isCompact()) { Journal }
+      </a>
       <a mat-button routerLink="/informations" routerLinkActive="active-link" ariaCurrentWhenActive="page" title="Informations sur vos données personnelles" aria-label="Informations sur vos données personnelles">
         <mat-icon aria-hidden="true">info</mat-icon>
         @if (!isCompact()) { Informations }
