@@ -6,6 +6,8 @@ services:
     ports:
       - '8081:80'
     environment:
+      # Préfixe d'URL si MIAM est servi sous un chemin (ex. /miam derrière Traefik) ; vide = racine.
+      PREFIX_URL: ${PREFIX_URL:-}
       # CAS vu par le module BFF : hôte + contexte (/sso, /cas, /user ou aucun, selon l'application.yml du CAS).
       # C'est la seule valeur qui porte le contexte : l'API Actuator et l'adresse publique s'en déduisent.
       CAS_BASE_URL: ${CAS_BASE_URL:?à renseigner}
