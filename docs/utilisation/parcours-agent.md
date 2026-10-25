@@ -17,7 +17,7 @@ Selon ses groupes dans l'annuaire, l'agent obtient un profil :
 | Profil | Ce qu'il voit et peut faire |
 | --- | --- |
 | **Administration** | Tout : listes, détail, suppression de comptes TOTP, révocation d'appareils et de sessions, **Journal** |
-| **Consultation** (étiquette « Consultation » dans la barre d'outils) | Lecture seule : listes et détail, sans boutons Supprimer / Révoquer, sans compteur ni page Journal |
+| **Consultation** (étiquette « Consultation » dans la barre d'outils) | Lecture seule : listes et détail, sans boutons Supprimer / Révoquer ; compteur et page Journal accessibles |
 
 Un agent authentifié mais dans aucun groupe voit « **Accès refusé** » sur l'accueil et n'ouvre pas de session ; il doit demander son habilitation à l'administrateur de l'annuaire.
 
@@ -88,7 +88,12 @@ Onglet *Appareils de confiance* → rechercher l'utilisateur → **Révoquer** l
 
 ## 6️⃣ Le journal d'activité (`/journal`)
 
-Accessible par le bouton **Journal** de la barre d'outils. Tableau *Date · Agent · Action · Compte concerné*, trié du plus récent au plus ancien (2 000 entrées maximum), avec **deux filtres indépendants** :
+Accessible par le bouton **Journal** de la barre d'outils, aux profils Administration et Consultation. Tableau *Date · Agent · Action · Compte concerné*, trié du plus récent au plus ancien (2 000 entrées maximum), avec **deux filtres indépendants** et **tri cliquable** :
+
+- Cliquer sur un en-tête de colonne trie par cette colonne (croissant), un deuxième clic inverse la direction (décroissant), un troisième supprime le tri ;
+- La flèche dans l'en-tête indique la colonne active et la direction actuelle.
+
+Au-dessus du tableau, trois compteurs donnent le **nombre d'actions par motif** (*Suppression compte TOTP*, *Révocation appareil de confiance*, *Révocation session SSO*) ; ils suivent les filtres saisis. Le journal ne détaille ni identifiant de session ni clé d'appareil : seulement qui, quoi, sur quel compte et quand.
 
 | Filtre | Répond à la question |
 | --- | --- |

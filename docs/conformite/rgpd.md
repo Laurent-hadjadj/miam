@@ -51,7 +51,7 @@ Analyse des données personnelles traitées par MIAM, de leur cycle de vie et de
 | --- | :---: | --- |
 | Licéité, loyauté, transparence | 🟡 | Base légale à documenter (section 4) ; page d'information `/informations` en place (section 7), à compléter avec les mentions de l'organisme |
 | Limitation des finalités | ✅ | Un seul usage : débloquer un utilisateur et tracer l'action. Le journal n'est pas réutilisé à d'autres fins |
-| Minimisation | 🟡 | Secrets TOTP exclus, aucune copie des comptes, journal réservé au profil admin, population d'agents restreinte par groupe AD. Reste : la clé d'appareil écrite dans `detail` contient l'empreinte |
+| Minimisation | 🟡 | Secrets TOTP exclus, aucune copie des comptes, journal sans identifiant de session ni clé d'appareil (champ `detail` jamais exposé), population d'agents restreinte par groupe AD. |
 | Exactitude | ✅ | Données lues en direct dans CAS, pas de recopie |
 | Limitation de la conservation | ✅ | Journal purgé automatiquement au-delà de `AUDIT_RETENTION_MONTHS` (12 mois par défaut, 6 à 12 autorisés). Reste à aligner les sauvegardes et les journaux du reverse proxy |
 | Intégrité et confidentialité | ✅ | Voir section 8 |

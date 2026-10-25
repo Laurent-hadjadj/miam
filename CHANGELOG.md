@@ -4,6 +4,37 @@ Toutes les évolutions notables de MIAM sont documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.2.0] - 2026-10-25
+
+### Ajouté
+
+- **Compteurs par motif dans le journal** : trois tuiles indiquent le nombre de suppressions de compte TOTP, de révocations d'appareil de confiance et de révocations de session SSO (calculées sur les entrées retenues par les filtres) ;
+- **Tri du journal par colonne ou par direction** : cliquer sur l'en-tête d'une colonne trie les lignes par cette colonne ; un deuxième clic inverse la direction (croissant / décroissant), un troisième supprime le tri. L'en-tête actif et la direction sont indiqués par une flèche ;
+- **Badge d'environnement sur toutes les pages** : le badge (DEV, INT, REC, PRD) présent dans l'en-tête des pages publiques est désormais aussi affiché dans la barre d'outils connectée (`mat-toolbar`), visible sur toutes les pages après authentification ;
+- **Tests e2e — preuves visuelles** : `npm run e2e:visuel` (config `playwright.visuel.config.ts`) enregistre une vidéo, une capture et une trace par test et produit un rapport HTML consultable avec `npm run e2e:rapport` ;
+
+### Modifié
+
+- **Journal ouvert au profil consultation** : `GET /bff/audit-log` n'exige plus le profil administrateur, le lien et la page « Journal » ainsi que la tuile « Suppressions journalisées » sont visibles par la consultation. Le journal n'affichant que l'agent, l'action, le compte concerné et l'heure, le BFF ne renvoie plus le champ `detail` (clé d'appareil, TGT), y compris pour les anciennes entrées ; il reste en base. `adminGuard` et `requireAdmin` sont supprimés (code mort) ;
+
+### Corrigé
+
+- **Docker — journal local embarqué dans l'image** : `server/data` (base SQLite d'audit, données personnelles) n'était pas exclu par `.dockerignore` ; `COPY server` l'embarquait et le volume `/app/server/data` en héritait au premier démarrage. Exclus, ainsi que `playwright-report` (70 Mo), `playwright*.config.ts`, `skills` et `scripts` ;
+- **Docker — `PREFIX_URL`** : variable transmise par `docker-compose.yml` et documentée dans `docs/exploitation/configuration.md` (le port CAS par défaut y est corrigé : 8083) ;
+- **Liste des utilisateurs — libellé du bouton de révocation d'appareil** : l'apostrophe typographique de l'`aria-label` est rétablie (échappée en `\u2019`), ce qui corrige un test e2e d'accessibilité ;
+- **Tests BFF** : `startBff` fournit `prefixUrl`, la signature de `AuditLog.record` (`target_display`) et le port CAS par défaut (8083) sont alignés ; 53 tests passent ;
+- **Page d'accueil — icône des messages d'alerte tronquée** : dans le bandeau d'erreur (ex. utilisateur authentifié mais absent du groupe AD autorisé), l'icône `mat-icon` rétrécissait dans le conteneur `flex` quand le message était long. Elle ne rétrécit plus (`flex: 0 0 auto`) et le texte passe à la ligne (`overflow-wrap`) ;
+- **Liste des utilisateurs — seuil d'alerte du journal** : `auditLogCountIsHigh` reste un signal `computed` avec le seuil de 1 000 000 d'entrées (le refactoring l'avait transformé en méthode avec un seuil de 100) ;
+- **Tests — couverture** : 4 tests ajoutés pour le tri du journal (tri par défaut, cycle croissant / décroissant / aucun, colonne unique, cibles nulles) ; 128 tests unitaires, seuils de couverture (85 %) respectés ;
+- **Version affichée dans le pied de page** : le fallback statique passait de `1.0.0` à `1.2.0` pour coller à la version `package.json` ; la version est désormais lue dynamiquement via `APP_VERSION` exposée par `/env.js` (résolue depuis `package.json` par le BFF si non fournie) ;
+- **Tri — erreurs de type TypeScript** : les méthodes `activeSortColumn()` et `activeSortDirection()` du journal renvoyaient `''` (chaîne vide) au lieu d'un type `'asc' | 'desc'`. Converties en `computed` signals avec les types explicites `'string'` et `'asc' | 'desc'` ;
+- **Tri — table non reconnue par Material** : la balise `<table>` du journal manquait l'attribut `mat-table`, provoquant une erreur de compilation Angular (`MatTableModule` ne trouvait pas l'élément). Ajout de `mat-table` ;
+- **Liste des utilisateurs — erreurs de build et de tests** :
+  - `AccountAdminService.getAll()` n'existait pas ; remplacé par `gauthService.getAll()` pour les comptes TOTP et `trustedDeviceService.getAll()` pour les appareils ;
+  - `user-list.html` : `[attr.aria-label]` contenait une apostrophe française (`l'appareil`) qui plantait le compilateur Angular. Remplacée par `\u0027` (escape Unicode) ;
+  - Tests `user-list.spec.ts` : 4 échecs dus au chargement asynchrone (`Promise.all` + `Promise.all().then()` ne se résolvait pas avant les assertions). Ajout d'une fonction `flushMicrotasks()` pour attendre les micro-tâches, et restructuration de `setup()` pour que `fixture.detectChanges()` et `flushLoad()` s'exécutent dans le bon ordre ;
+  - Suppression du fichier `src/user-list.ts` (ancien chemin non utilisé par les routes) ;
+
 ## [1.1.1] - 2026-10-21
 
 ### Corrigé

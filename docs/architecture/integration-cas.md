@@ -154,8 +154,8 @@ MIAM ne tient **aucune table d'habilitations** : le profil de l'agent est dédui
 
 | Groupe de l'agent | Profil | Droits |
 | --- | --- | --- |
-| Dans `ROLE_ADMIN_GROUPS` | **admin** | Lecture, suppression de comptes TOTP, révocation d'appareils et de sessions, journal d'activité |
-| Dans `ROLE_CONSULT_GROUPS` (et pas admin) | **consultation** | Lecture seule : ni suppression, ni révocation, ni journal |
+| Dans `ROLE_ADMIN_GROUPS` | **admin** | Lecture, suppression de comptes TOTP, révocation d'appareils et de sessions, consultation du journal d'activité |
+| Dans `ROLE_CONSULT_GROUPS` (et pas admin) | **consultation** | Lecture seule : ni suppression, ni révocation ; consultation du journal d'activité autorisée |
 | Aucun des deux | — | **Aucune session** : « Accès refusé » (HTTP 403) |
 
 Les noms de groupes se configurent par leur **nom court** (le `CN`), sans casse : `GRP_MIAM_ADMIN` couvre `CN=GRP_MIAM_ADMIN,OU=…`. Voir [Configuration](../exploitation/configuration.md).
@@ -171,7 +171,7 @@ Les noms de groupes se configurent par leur **nom court** (le `CN`), sans casse 
 
 _
 > [!TIP]
-> Le droit est appliqué **côté serveur** : un profil consultation reçoit `403` sur toute suppression et sur le journal, même s'il appelle l'API à la main. L'interface masque simplement les boutons.
+> Le droit est appliqué **côté serveur** : un profil consultation reçoit `403` sur toute suppression, même s'il appelle l'API à la main. Le journal est lisible par les deux profils : il ne contient que l'agent, l'action, le compte concerné et l'heure. L'interface masque simplement les boutons.
 
 _
 > [!NOTE]
@@ -181,7 +181,7 @@ _
 
 | Groupe | Profil | Membres | Remarque |
 | --- | --- | --- | --- |
-| `GRP_MIAM_ADMIN` | Administration | Utilisateurs habilités à supprimer / révoquer et à lire le journal | Population restreinte, revue régulière |
+| `GRP_MIAM_ADMIN` | Administration | Utilisateurs habilités à supprimer / révoquer | Population restreinte, revue régulière |
 | `GRP_MIAM_CONSULT` | Consultation | utilisateurs en lecture seule (supervision, support de niveau 1) | Facultatif au démarrage |
 
 Un utilisateur présent dans les deux groupes a le profil le plus élevé (administration). Les groupes doivent être **visibles par le serveur CAS** dans `memberOf` : si le serveur CAS lit déjà les groupes AD/openLDAP (pour le déclencheur MFA global, par exemple), il n'y a rien d'autre à brancher que la vérification de l'attribut vers le service MIAM.

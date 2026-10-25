@@ -4,16 +4,16 @@
 
 | Suite | Fichiers | Tests | Outil | Nature |
 | --- | ---: | ---: | --- | --- |
-| Application Angular (`src/**/*.spec.ts`) | 21 | **116** | Vitest 5 + `TestBed` (jsdom) | Services, garde, composants |
-| Module BFF (`server/test/*.test.js`) | 4 | **41** | `node:test` (intégré à Node) | Routes, session, relais, journal, configuration, point de santé |
-| Bout en bout (`e2e/`) | 9 | **59** | Playwright | Voir [Tests e2e](test-e2e.md) |
+| Application Angular (`src/**/*.spec.ts`) | 22 | **128** | Vitest 5 + `TestBed` (jsdom) | Services, garde, composants |
+| Module BFF (`server/test/*.test.js`) | 5 | **53** | `node:test` (intégré à Node) | Routes, session, relais, journal, configuration, point de santé |
+| Bout en bout (`e2e/`) | 9 | **60** | Playwright | Voir [Tests e2e](test-e2e.md) |
 
 > **Couverture de code**
 
 | Périmètre | Lignes | Branches | Fonctions | Instructions |
 | --- | ---: | ---: | ---: | ---: |
-| Application Angular | **95,41 %** | 93,45 % | 90,04 % | 93,95 % |
-| BFF (`server/`) | **97,79 %** | 93,79 % | 97,83 % | — |
+| Application Angular | **94,71 %** | 87,26 % | 85,23 % | 92,61 % |
+| BFF (`server/`) | **98,51 %** | 91,75 % | 100,00 % | — |
 
 > [!NOTE]
 > Ces valeurs sont un **relevé manuel**, pas une sortie de CI : elles se périment à chaque campagne de tests. Les régénérer avec `npm run test:coverage` et `npm run test:bff` (voir [Checklist de release](checklist-release.md)).
@@ -70,8 +70,8 @@ Chaque `*.spec.ts` est à côté du fichier testé. Les doublures partagées son
 | Authentification | 401 sans session partout ; 400/401 sur ticket absent/invalide ; cookie `httpOnly` + `SameSite=Lax` ; déconnexion ; CAS injoignable (502) |
 | Relais | `Authorization: Basic` ajouté **côté serveur** ; verbes autres que GET/DELETE refusés (405) ; actuator injoignable (502) |
 | Données sensibles | `secretKey`, `validationCode`, `scratchCodes` absents des réponses |
-| Journal | Les trois types d'action et la suppression en masse sont tracés avec l'agent réel ; un échec CAS ou une lecture ne l'est pas ; URL malformée sans plantage |
-| Habilitations | Extraction de `memberOf` (valeurs multiples, entités XML), correspondance par nom court ; administrateur / consultation / hors groupe ; **403** sur toute suppression et sur le journal pour la consultation (rien n'est envoyé à CAS, rien n'est journalisé) ; **403** à la connexion hors groupe ; production sans `ROLE_ADMIN_GROUPS` refusée |
+| Journal | Les trois types d'action et la suppression en masse sont tracés avec l'agent réel ; un échec CAS ou une lecture ne l'est pas ; URL malformée sans plantage ; la lecture (`GET /bff/audit-log`) ne renvoie jamais le champ `detail`, même pour d'anciennes entrées |
+| Habilitations | Extraction de `memberOf` (valeurs multiples, entités XML), correspondance par nom court ; administrateur / consultation / hors groupe ; **403** sur toute suppression pour la consultation, qui peut en revanche lire le journal (rien n'est envoyé à CAS, rien n'est journalisé) ; **403** à la connexion hors groupe ; production sans `ROLE_ADMIN_GROUPS` refusée |
 | Purge du journal | Seules les entrées plus anciennes que la durée sont supprimées (12 puis 6 mois), purge idempotente ; configuration : 12 par défaut, 6 à 12 acceptés, autre valeur refusée |
 | Point de santé | Public (sans session) ; 200 / `OK`, 503 / `KO` si CAS est injoignable, 429 au-delà de la limite de débit (idem pour `/bff/session` et `/api`, avec `Retry-After`) ; `/api/*` reste protégé ; cache de 5 s, 5xx de CAS = défaut, 3xx/4xx = joignable |
 | Configuration | Valeurs par défaut ; **démarrage refusé en production** sans secrets ; simple avertissement hors production |

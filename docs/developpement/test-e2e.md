@@ -27,7 +27,7 @@ Aucun serveur CAS, MongoDB ni le module BFF réel n'est nécessaire. Tous les ap
 | `user-details.spec.ts` | 4 | Détail formaté, pastille grise sans session, cascade, suppression de son propre compte |
 | `journal.spec.ts` | 3 | Double filtre agent / compte, filtre cible seul, clic vers le détail |
 | `accessibility.spec.ts` | 19 | **axe-core (WCAG 2 A/AA + bonnes pratiques, contraste inclus)** sur accueil, déconnexion, gestion (3 onglets), détail, journal et boîte de confirmation, dans les deux thèmes ; clavier (focus de la boîte, Échap, lien d'évitement, `aria-current`), zone `<output>`, titres et `h1` |
-| `habilitations.spec.ts` | 8 | Profil consultation (aucun bouton destructif, pas de Journal, `/journal` renvoie à la liste), profil admin, agent hors groupe (message dédié), **page `/informations`** (en-tête avant connexion, barre d'outils après, mobile : cible 44 px et pas de débordement), bouton de déconnexion visible à 375 px |
+| `habilitations.spec.ts` | 8 | Profil consultation (aucun bouton destructif, lien et page Journal accessibles), profil admin, agent hors groupe (message dédié), **page `/informations`** (en-tête avant connexion, barre d'outils après, mobile : cible 44 px et pas de débordement), bouton de déconnexion visible à 375 px |
 | `confidentialite.spec.ts` | 2 | **Aucune requête vers un tiers** (toute requête hors de l'origine de l'application échoue le test) ; Roboto et Material Icons réellement chargées, icônes rendues en glyphes |
 | `theme.spec.ts` | 8 | Thème par défaut et bascule (cookie, rechargement), mobile / tablette / « medium », bascule une fois connecté, **contraste WCAG ≥ 4,5:1 du bouton principal dans les deux thèmes** |
 
@@ -37,7 +37,11 @@ Aucun serveur CAS, MongoDB ni le module BFF réel n'est nécessaire. Tous les ap
 npm run e2e                          # toute la suite
 npx playwright test theme.spec.ts    # un fichier
 npx playwright test --ui             # mode interactif
+npm run e2e:visuel                   # toute la suite avec vidéo, capture et trace de chaque test
+npm run e2e:rapport                  # ouvre le rapport HTML (playwright-report/)
 ```
+
+`npm run e2e:visuel` utilise `playwright.visuel.config.ts` : une vidéo (`video.webm`), une capture finale (`test-finished-1.png`) et une trace par test, dans `test-results/` et dans le rapport HTML `playwright-report/` (dossiers ignorés par git, environ 70 Mo). L'enregistrement vidéo exige le composant ffmpeg de Playwright, à installer une fois : `npx playwright install ffmpeg`.
 
 `playwright.config.ts` lance `npm start` si le port 4200 est libre et **réutilise** un serveur déjà démarré (hors intégration continue). Navigateur : Chrome installé sur la machine (`channel: 'chrome'`), aucun téléchargement.
 

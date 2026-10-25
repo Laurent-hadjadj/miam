@@ -79,7 +79,7 @@ sequenceDiagram
 | `core/` | Services sans interface : `CasAuthService` (session), `GauthCredentialService`, `TrustedDeviceService`, `SsoSessionService`, `AuditLogService`, `AccountAdminService` (cascade de suppression), `ThemeService`, `ResponsiveService`, garde, modèles, configuration publique (`api-config.ts`) |
 | `home/`, `logged-out/` | Pages publiques |
 | `information/` | Pages publiques |
-| `user-list/`, `user-details/`, `journal/` | Pages de gestion (chargées à la demande) |
+| `user-list/`, `user-details/`, `journal/` | Pages de gestion (chargées à la demande) ; le journal supporte le tri par colonne et par direction (signaux `computed`) |
 | `brand-header/`, `theme-switch/`, `app-footer/`, `search-bar/` | Composants partagés |
 
 > [!NOTE]
@@ -119,7 +119,7 @@ Une même image sert tous les environnements, seules les variables d'environneme
 | `POST {prefixUrl}/bff/session` | non | Valide le ticket auprès du serveur CAS, lit les groupes (`memberOf`), déduit le profil et ouvre la session ; **403** si l'agent n'est dans aucun groupe |
 | `GET /bff/session` | session | Identité et profil de l'agent (401 sinon) |
 | `POST {prefixUrl}/bff/logout` | — | Détruit la session |
-| `GET {prefixUrl}/bff/audit-log` | session **admin** | 2 000 dernières entrées du journal (403 pour la consultation) |
+| `GET {prefixUrl}/bff/audit-log` | session (admin ou consultation) | 2 000 dernières entrées du journal : horodatage, agent, action, compte concerné (le champ `detail` n'est jamais renvoyé) |
 | `GET /api/*` | session | Relais de lecture vers l'API Actuator du serveur CAS |
 | `DELETE /api/*` | session **admin** | Relais de suppression (403 pour la consultation, rien n'est envoyé à CAS) |
 | `POST`/`PUT`/`PATCH /api/*` | session | **405** : seules la lecture et la suppression sont relayées (l'import de comptes TOTP, par exemple, n'est pas exposé) |

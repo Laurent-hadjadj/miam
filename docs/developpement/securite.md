@@ -16,7 +16,7 @@ Les risques traités :
 | Action destructrice non attribuable | Journal d'activité côté BFF, avec l'identité réelle de l'agent, seulement sur succès |
 | Session volée | Cookie `httpOnly`, `SameSite=Lax`, `Secure` en HTTPS, durée 8 h alignée sur le TGT |
 | CSRF | `SameSite=Lax` + requêtes d'état uniquement par `fetch`/XHR (voir [Architecture](../architecture/architecture-technique.md)) |
-| Agent trop privilégié | Deux profils issus des groupes AD (admin / consultation), **appliqués côté serveur** (403 sur toute suppression et sur le journal pour la consultation) ; hors des groupes : aucune session. Pas de table d'habilitations dans MIAM (source : l'annuaire) |
+| Agent trop privilégié | Deux profils issus des groupes AD (admin / consultation), **appliqués côté serveur** (403 sur toute suppression pour la consultation ; le journal, sans donnée de session, est lisible par les deux profils) ; hors des groupes : aucune session. Pas de table d'habilitations dans MIAM (source : l'annuaire) |
 | Démarrage avec secrets par défaut | **Refusé** en production (`NODE_ENV=production`), y compris sans `ROLE_ADMIN_GROUPS` ; avertissement hors production |
 | Dépendances vulnérables | `npm audit` : 0 vulnérabilité (relevé du 15/10/2026) — le relais HTTP est écrit avec `fetch`, sans bibliothèque de proxy |
 

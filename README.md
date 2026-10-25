@@ -34,7 +34,11 @@ _
 ## 1️⃣ Licence
 
 > [!NOTE]
-> MIAM est distribuée sous licence **[Creative Commons CC BY-NC-SA 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)** : citer l'auteur (BY), pas d'usage commercial (NC), partage sous la même licence (SA).
+> MIAM est distribuée sous licence **[Creative Commons CC BY-NC-SA 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)** :
+>
+> - citer l'auteur (**BY**),
+> - pas d'usage commercial (**NC**),
+> - partage sous la même licence (**SA**).
 
 ## 2️⃣ Fonctionnalités disponibles
 
