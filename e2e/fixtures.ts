@@ -226,7 +226,7 @@ function jsonRoute(data: unknown) {
   return (route: Route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
 }
 
-/** Entrée du journal d'activité telle que renvoyée par `GET /bff/audit-log` (réservé au profil admin). */
+/** Entrée du journal d'activité telle que renvoyée par `GET /bff/audit-log` (lisible par tous les profils, sans le champ `detail`). */
 export interface AuditLogEntryFixture {
   /** Date ISO 8601 UTC. */
   timestamp: string;

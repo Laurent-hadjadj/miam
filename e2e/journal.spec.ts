@@ -10,7 +10,7 @@
  */
 
 /**
- * Journal d'activité (`/journal`, profil administrateur) : qui a supprimé ou révoqué quoi, et quand.
+ * Journal d'activité (`/journal`, profils administrateur et consultation) : qui a supprimé ou révoqué quoi, et quand.
  *
  * Contrats vérifiés :
  * - la liste affiche les entrées fournies par `GET /bff/audit-log` ;
@@ -64,7 +64,7 @@ test.describe('Journal d\'activité', () => {
     // Ajoute le filtre sur le compte concerné : ne garde que la ligne où sophie.petite-coeur a agi sur zoe.dupont.
     await page.getByPlaceholder('Filtrer par compte concerné (qui a subi l\'action)').fill('zoe');
     await expect(page.locator('table.data-table tbody tr')).toHaveCount(1);
-    await expect(page.getByText('Révocation appareil de confiance')).toBeVisible();
+    await expect(page.locator('table.data-table').getByText('Révocation appareil de confiance')).toBeVisible();
   });
 
   test('le filtre sur le compte concerné seul retrouve une action quel que soit l\'agent', async ({ page }) => {

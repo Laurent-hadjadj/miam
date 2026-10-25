@@ -16,8 +16,8 @@
  * ces tests vérifient seulement que l'INTERFACE le reflète. Le refus réel (403) est testé côté serveur
  * (server/test/app.test.js).
  *
- * - `admin` : boutons de suppression, lien « Journal », quatrième tuile de compteur ;
- * - `consultation` : lecture seule, aucun bouton d'action, ni journal ni sa tuile ;
+ * - `admin` : boutons de suppression ;
+ * - `consultation` : lecture seule, aucun bouton d'action ; le journal (lien, tuile de compteur, page) reste accessible ;
  * - hors des groupes : le module BFF répond 403 à l'ouverture de session, message dédié sur l'accueil.
  *
  * Suivent deux contrôles voisins : la barre d'outils en mobile et la page d'information RGPD.
@@ -27,7 +27,7 @@ import { expect, test } from '@playwright/test';
 import { makeAccount, makeDevice, makeSession, mockActuator, mockBffSession, withSession } from './fixtures';
 
 test.describe('Habilitations (profils issus des groupes AD)', () => {
-  test('profil consultation : lecture seule, sans suppression ni journal', async ({ page }) => {
+  test('profil consultation : lecture seule, sans suppression, avec accès au journal', async ({ page }) => {
     await withSession(page, 'bob.lecteur', 'consultation');
     await mockActuator(page, [makeAccount('alice.martin')], [makeDevice('alice.martin')], [makeSession('alice.martin')]);
     await page.goto('/users');
@@ -35,19 +35,20 @@ test.describe('Habilitations (profils issus des groupes AD)', () => {
     await expect(page.getByRole('table', { name: 'Comptes TOTP' })).toBeVisible();
     await expect(page.getByRole('button', { name: /Afficher les détails de alice.martin/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Supprimer|Révoquer/ })).toHaveCount(0);
-    await expect(page.locator('.stat-tile')).toHaveCount(3);
-    await expect(page.getByRole('link', { name: 'Journal' })).toHaveCount(0);
+    await expect(page.locator('.stat-tile')).toHaveCount(4);
+    await expect(page.getByRole('link', { name: 'Journal' })).toBeVisible();
     await expect(page.getByText('Consultation', { exact: true })).toBeVisible();
   });
 
-  test('profil consultation : la page /journal renvoie vers la liste', async ({ page }) => {
+  test('profil consultation : la page /journal est accessible', async ({ page }) => {
     await withSession(page, 'bob.lecteur', 'consultation');
     await mockActuator(page, [], []);
     await page.goto('/journal');
-    await expect(page).toHaveURL(/\/users$/);
+    await expect(page).toHaveURL(/\/journal$/);
+    await expect(page.getByRole('heading', { name: "Journal d'activité" })).toBeVisible();
   });
 
-  test('profil administrateur : boutons de suppression, journal et compteur à 4 tuiles', async ({ page }) => {
+  test('profil administrateur : boutons de suppression et journal', async ({ page }) => {
     await withSession(page);
     await mockActuator(page, [makeAccount('alice.martin')], [makeDevice('alice.martin')], [makeSession('alice.martin')]);
     await page.goto('/users');
