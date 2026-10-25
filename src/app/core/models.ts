@@ -71,5 +71,6 @@ export interface AuditLogEntry {
   actor: string;
   action: AuditAction;
   target: string | null;
-  detail: string | null;
+  /** Non renvoyé par le BFF (retiré de la réponse : clé d'appareil, TGT) ; conservé en base pour l'exploitation. */
+  detail?: string | null;
 }

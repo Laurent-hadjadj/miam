@@ -107,6 +107,84 @@ describe('Journal', () => {
     expect(component.pageIndex()).toBe(0);
   });
 
+  it('trie par défaut du plus récent au plus ancien', () => {
+    const older = { ...entry('alice', 'bob'), timestamp: '2026-10-01T09:00:00.000Z' };
+    const newer = { ...entry('carol', 'dave'), timestamp: '2026-10-20T09:00:00.000Z' };
+    const { component } = setup([older, newer]);
+    expect(component.pagedEntries().map((e) => e.actor)).toEqual(['carol', 'alice']);
+    expect(component.isSorted('timestamp')).toBe(true);
+    expect(component.sortIcon('timestamp')).toBe('arrow_downward');
+  });
+
+  it('bascule le tri d\'une colonne : croissant, décroissant, puis aucun tri', () => {
+    const { component } = setup([entry('bob', 'x'), entry('Alice', 'y'), entry('carol', 'z')]);
+
+    component.toggleSort('actor');
+    expect(component.sortIcon('actor')).toBe('arrow_upward');
+    expect(component.pagedEntries().map((e) => e.actor)).toEqual(['Alice', 'bob', 'carol']);
+
+    component.toggleSort('actor');
+    expect(component.sortIcon('actor')).toBe('arrow_downward');
+    expect(component.pagedEntries().map((e) => e.actor)).toEqual(['carol', 'bob', 'Alice']);
+
+    component.toggleSort('actor');
+    expect(component.isSorted('actor')).toBe(false);
+    expect(component.sortIcon('actor')).toBe('');
+    // Plus aucun tri : l'ordre reçu du BFF est conservé.
+    expect(component.pagedEntries().map((e) => e.actor)).toEqual(['bob', 'Alice', 'carol']);
+  });
+
+  it('une seule colonne est triée à la fois', () => {
+    const { component } = setup([entry('bob', 'x'), entry('alice', 'y')]);
+    component.toggleSort('actor');
+    component.toggleSort('target');
+    expect(component.isSorted('actor')).toBe(false);
+    expect(component.isSorted('target')).toBe(true);
+    expect(component.isSorted('timestamp')).toBe(false);
+  });
+
+  it('trie sur chaque colonne, les cibles nulles étant traitées comme vides', () => {
+    const { component } = setup([
+      entry('alice', 'zoe', 'REVOKE_SSO_SESSION'),
+      entry('bob', null, 'DELETE_TOTP_ACCOUNT'),
+      entry('carol', 'adam', 'REVOKE_TRUSTED_DEVICE'),
+    ]);
+
+    component.toggleSort('target');
+    expect(component.pagedEntries().map((e) => e.target)).toEqual([null, 'adam', 'zoe']);
+
+    component.toggleSort('action');
+    expect(component.pagedEntries().map((e) => e.action)).toEqual([
+      'DELETE_TOTP_ACCOUNT',
+      'REVOKE_SSO_SESSION',
+      'REVOKE_TRUSTED_DEVICE',
+    ]);
+
+    component.toggleSort('timestamp');
+    expect(component.isSorted('timestamp')).toBe(true);
+    component.toggleSort('timestamp');
+    component.toggleSort('timestamp');
+    expect(component.isSorted('timestamp')).toBe(false);
+  });
+
+  it('compte les actions par motif, sur les entrées retenues par les filtres', async () => {
+    const { component } = setup([
+      entry('alice', 'bob', 'DELETE_TOTP_ACCOUNT'),
+      entry('alice', 'carol', 'DELETE_TOTP_ACCOUNT'),
+      entry('dave', 'bob', 'REVOKE_TRUSTED_DEVICE'),
+    ]);
+    const counts = () => Object.fromEntries(component.actionCounts().map((c) => [c.action, c.count]));
+    expect(counts()).toEqual({ DELETE_TOTP_ACCOUNT: 2, REVOKE_TRUSTED_DEVICE: 1, REVOKE_SSO_SESSION: 0 });
+
+    component.onActorFilter('dave');
+    expect(counts()).toEqual({ DELETE_TOTP_ACCOUNT: 0, REVOKE_TRUSTED_DEVICE: 1, REVOKE_SSO_SESSION: 0 });
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const tiles = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.stat-tile')).map((t) => [t.querySelector(".stat-value")?.textContent, t.querySelector(".stat-label")?.textContent]);
+    expect(tiles).toEqual([['0', 'Suppression compte TOTP'], ['1', 'Révocation appareil de confiance'], ['0', 'Révocation session SSO']]);
+  });
+
   it('libellés français des actions, code brut si inconnu', () => {
     const { component } = setup([]);
     expect(component.actionLabel('DELETE_TOTP_ACCOUNT')).toBe('Suppression compte TOTP');

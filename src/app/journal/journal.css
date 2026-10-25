@@ -31,6 +31,37 @@ h1 {
   flex: 1 1 280px;
 }
 
+.stats-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.stat-tile {
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #f4f9fa;
+  border: 1px solid #dce7ea;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #00445a;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #3c5a63;
+  text-align: center;
+}
+
 .loading-row {
   display: flex;
   justify-content: center;
@@ -45,4 +76,28 @@ h1 {
 .empty-message {
   padding: 1rem;
   color: var(--mat-sys-on-surface-variant, #666);
+}
+
+/* En-têtes triables */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  background-color: rgba(0, 68, 90, 0.06);
+}
+
+.sort-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-left: 4px;
+  opacity: 0.4;
+}
+
+.sorted .sort-icon {
+  opacity: 1;
+  color: #00445a;
 }

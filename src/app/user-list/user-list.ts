@@ -3,7 +3,7 @@
  *  --------------
  *  Copyright (c) 2015-2026.
  *  Laurent HADJADJ <laurent_h@me.com>.
- *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  Licensed Creative Common CC-BY-NC-SA 4.0.
  *  ---
  *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
  *  http://creativecommons.org/licenses/by-nc-sa/4.0/
@@ -18,7 +18,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { filter, switchMap } from 'rxjs';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatIconModule } from '@angular/material/icon';
+import { filter, switchMap, forkJoin } from 'rxjs';
 import { ConfirmService } from '../core/confirm.service';
 import { NotificationService } from '../core/notification.service';
 import { SearchBar } from '../search-bar/search-bar';
@@ -42,7 +44,7 @@ const DEFAULT_PAGE_SIZE = 10;
  * AccountAdminService (suppression en cascade), ConfirmService, NotificationService, CasAuthService
  * (profil, déconnexion), Router (fiche d'un utilisateur) et SearchBar.
  *
- * Données : les trois listes sont chargées en entier, puis filtrées et paginées dans le navigateur
+ * Données : les trois listes sont chargées en entier, puis filtrées, triées et paginées dans le navigateur
  * (la recherche ne déclenche aucun appel). La recherche porte sur l'identifiant et le nom d'appareil
  * (l'identifiant seul pour les sessions) ; les compteurs du bandeau, eux, ne sont jamais filtrés.
  *
@@ -66,6 +68,8 @@ const DEFAULT_PAGE_SIZE = 10;
     MatTabsModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatSortModule,
+    MatIconModule,
     SearchBar,
   ],
   templateUrl: './user-list.html',
@@ -90,135 +94,168 @@ export class UserList {
   /** Texte de recherche commun aux trois onglets. */
   readonly searchTerm = signal('');
 
-  /** Listes complètes telles que reçues, avant filtrage et pagination. */
+  /** Listes complètes telles que reçues, avant filtrage, tri et pagination. */
   private readonly accounts = signal<TotpAccount[]>([]);
   private readonly devices = signal<TrustedDevice[]>([]);
   private readonly sessions = signal<SsoSession[]>([]);
-  /** Journal d'activité, chargé seulement pour le profil administration (sert au compteur). */
   private readonly auditLog = signal<AuditLogEntry[]>([]);
 
-  /** Page affichée et taille de page de chaque onglet, indépendantes les unes des autres. */
-  readonly accountsPageIndex = signal(0);
-  readonly accountsPageSize = signal(DEFAULT_PAGE_SIZE);
-  readonly devicesPageIndex = signal(0);
-  readonly devicesPageSize = signal(DEFAULT_PAGE_SIZE);
-  readonly sessionsPageIndex = signal(0);
-  readonly sessionsPageSize = signal(DEFAULT_PAGE_SIZE);
+  /** Identifiants actifs pour la pastille de statut (optimisé : Set au lieu de recherche dans le tableau). */
+  readonly activeSessionPrincipals = computed(() => new Set(this.sessions().map((s) => s.authenticated_principal)));
 
-  /** Comptes TOTP dont l'identifiant ou le nom d'appareil contient la recherche (insensible à la casse). */
-  readonly filteredAccounts = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    return this.accounts().filter(
-      (a) => a.username.toLowerCase().includes(term) || a.name.toLowerCase().includes(term),
-    );
-  });
-
-  /** Appareils de confiance dont le titulaire ou le nom contient la recherche (insensible à la casse). */
-  readonly filteredDevices = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    return this.devices().filter(
-      (d) => d.principal.toLowerCase().includes(term) || d.name.toLowerCase().includes(term),
-    );
-  });
-
-  /** Page courante des comptes filtrés : c'est elle que le tableau affiche. */
-  readonly pagedAccounts = computed(() => {
-    const start = this.accountsPageIndex() * this.accountsPageSize();
-    return this.filteredAccounts().slice(start, start + this.accountsPageSize());
-  });
-
-  /** Page courante des appareils filtrés. */
-  readonly pagedDevices = computed(() => {
-    const start = this.devicesPageIndex() * this.devicesPageSize();
-    return this.filteredDevices().slice(start, start + this.devicesPageSize());
-  });
-
-  /** Sessions SSO dont le titulaire contient la recherche (insensible à la casse). */
-  readonly filteredSessions = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    return this.sessions().filter((s) => s.authenticated_principal.toLowerCase().includes(term));
-  });
-
-  /** Page courante des sessions filtrées. */
-  readonly pagedSessions = computed(() => {
-    const start = this.sessionsPageIndex() * this.sessionsPageSize();
-    return this.filteredSessions().slice(start, start + this.sessionsPageSize());
-  });
-
-  /** Totaux globaux (pas filtrés par la recherche) pour les compteurs du bandeau. */
+  /** Compteurs bruts (non filtrés). */
   readonly accountsCount = computed(() => this.accounts().length);
   readonly devicesCount = computed(() => this.devices().length);
   readonly sessionsCount = computed(() => this.sessions().length);
-  /** Taille totale du journal (toutes actions confondues) - sert de jauge pour savoir quand purger la base SQLite du module BFF. */
   readonly auditLogCount = computed(() => this.auditLog().length);
-  /** Seuil arbitraire mentionné par l'équipe comme signal qu'il faut purger la base - juste un repère visuel, pas de purge automatique. */
-  readonly auditLogCountIsHigh = computed(() => this.auditLogCount() >= 1_000_000);
 
-  /** Lookup O(1) pour la pastille de statut - évite un .some() par ligne sur de grandes listes (1000+ utilisateurs). */
-  readonly activeSessionPrincipals = computed(() => new Set(this.sessions().map((s) => s.authenticated_principal)));
-
-  /** Colonnes de chaque tableau, dans l'ordre d'affichage. */
-  readonly accountColumns = ['username', 'name', 'registrationDate', 'actions'];
-  readonly deviceColumns = ['principal', 'name', 'recordDate', 'expirationDate', 'actions'];
-  readonly sessionColumns = ['principal', 'authenticationDate', 'services', 'actions'];
+  /** Index (à partir de 0) de la page affichée pour chaque tableau. */
+  readonly accountsPageIndex = signal(0);
+  readonly devicesPageIndex = signal(0);
+  readonly sessionsPageIndex = signal(0);
+  /** Nombre de lignes par page pour chaque tableau. */
+  readonly accountsPageSize = signal(DEFAULT_PAGE_SIZE);
+  readonly devicesPageSize = signal(DEFAULT_PAGE_SIZE);
+  readonly sessionsPageSize = signal(DEFAULT_PAGE_SIZE);
   /** Tailles de page proposées par les paginateurs. */
-  readonly pageSizeOptions = [10, 25, 50, 100];
-
-  /** Charge les listes dès la création du composant. */
-  constructor() {
-    this.reload();
-  }
+  readonly pageSizeOptions = [10, 20, 50, 100];
 
   /**
-   * Relit en parallèle comptes, appareils, sessions et (administration seulement) journal. Chaque
-   * échec est annoncé séparément et laisse la liste concernée telle quelle.
-   *
-   * Fin du chargement : réponse du journal pour l'administration, réponse des sessions pour la
-   * consultation, qui ne lit pas le journal. Les réponses des comptes et des appareils ne la
-   * conditionnent pas.
+   * Entrées retenues par la recherche (sous-chaîne, insensible à la casse, espaces de bord ignorés).
+   * Les compteurs du bandeau, eux, ne sont jamais filtrés.
+   */
+  readonly filteredAccounts = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    if (!term) return this.accounts();
+    return this.accounts().filter((a) => {
+      const username = a.username.toLowerCase();
+      const name = a.name.toLowerCase();
+      return username.includes(term) || name.includes(term);
+    });
+  });
+
+  readonly filteredDevices = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    if (!term) return this.devices();
+    return this.devices().filter((d) => {
+      const principal = d.principal.toLowerCase();
+      const name = d.name.toLowerCase();
+      return principal.includes(term) || name.includes(term);
+    });
+  });
+
+  readonly filteredSessions = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    if (!term) return this.sessions();
+    return this.sessions().filter((s) => {
+      const principal = (s.authenticated_principal ?? '').toLowerCase();
+      return principal.includes(term);
+    });
+  });
+
+  /** Colonnes du tableau des comptes TOTP. */
+  readonly accountColumns = ['username', 'name', 'registrationDate', 'actions'];
+  /** Colonnes du tableau des appareils de confiance. */
+  readonly deviceColumns = ['principal', 'name', 'recordDate', 'expirationDate', 'actions'];
+  /** Colonnes du tableau des sessions SSO. */
+  readonly sessionColumns = ['principal', 'authenticationDate', 'services', 'actions'];
+
+  /**
+   * Tranches filtrées ET triées, puis paginées pour les comptes TOTP.
+   */
+  readonly pagedAccounts = computed(() => {
+    const data = this.sortFn(this.filteredAccounts(), 'username', 'asc');
+    const start = this.accountsPageIndex() * this.accountsPageSize();
+    return data.slice(start, start + this.accountsPageSize());
+  });
+
+  /**
+   * Tranches filtrées ET triées, puis paginées pour les appareils de confiance.
+   */
+  readonly pagedDevices = computed(() => {
+    const data = this.sortFn(this.filteredDevices(), 'principal', 'asc');
+    const start = this.devicesPageIndex() * this.devicesPageSize();
+    return data.slice(start, start + this.devicesPageSize());
+  });
+
+  /**
+   * Tranches filtrées ET triées, puis paginées pour les sessions SSO.
+   */
+  readonly pagedSessions = computed(() => {
+    const data = this.sortFn(this.filteredSessions(), 'authenticationDate', 'desc');
+    const start = this.sessionsPageIndex() * this.sessionsPageSize();
+    return data.slice(start, start + this.sessionsPageSize());
+  });
+
+  /**
+   * Charge toutes les données en une seule fois (la recherche, le tri et la pagination sont côté navigateur).
+   * En cas d'échec, un message est annoncé via la zone de notification.
    */
   reload(): void {
     this.loading.set(true);
-    this.gauthService.getAll().subscribe({
-      next: (accounts) => this.accounts.set(accounts),
-      error: () => this.notify("Impossible de charger les comptes TOTP."),
+
+    // Les appels sont indépendants et non critiques : on les lance en parallèle.
+    // En cas d'échec d'un seul, les autres données sont conservées.
+    const accounts$ = new Promise<void>((resolve) => {
+      this.gauthService.getAll().subscribe({
+        next: (accounts: TotpAccount[]) => {
+          this.accounts.set(accounts);
+          resolve();
+        },
+        error: () => {
+          this.notify('Échec du chargement des comptes TOTP.');
+          resolve();
+        },
+      });
     });
-    this.trustedDeviceService.getAll().subscribe({
-      next: (devices) => this.devices.set(devices),
-      error: () => this.notify('Impossible de charger les appareils de confiance.'),
+
+    const devices$ = new Promise<void>((resolve) => {
+      this.trustedDeviceService.getAll().subscribe({
+        next: (devices: TrustedDevice[]) => {
+          this.devices.set(devices);
+          resolve();
+        },
+        error: () => {
+          this.notify('Échec du chargement des appareils de confiance.');
+          resolve();
+        },
+      });
     });
-    // Sans journal (profil consultation), la fin du chargement est celle de la dernière liste.
-    const finSansJournal = () => {
-      if (!this.isAdmin()) {
-        this.loading.set(false);
-      }
-    };
-    this.ssoSessionService.getAll().subscribe({
-      next: (sessions) => {
-        this.sessions.set(sessions);
-        finSansJournal();
-      },
-      error: () => {
-        this.notify('Impossible de charger les sessions SSO.');
-        finSansJournal();
-      },
+
+    const sessions$ = new Promise<void>((resolve) => {
+      this.ssoSessionService.getAll().subscribe({
+        next: (sessions: SsoSession[]) => {
+          this.sessions.set(sessions);
+          resolve();
+        },
+        error: () => {
+          this.notify('Échec du chargement des sessions SSO.');
+          resolve();
+        },
+      });
     });
-    if (!this.isAdmin()) {
-      return;
-    }
-    this.auditLogService.getAll().subscribe({
-      next: (entries) => {
-        this.auditLog.set(entries);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.notify("Impossible de charger le journal d'activité.");
-        this.loading.set(false);
-      },
+
+    const audit$ = new Promise<void>((resolve) => {
+      this.auditLogService.getAll().subscribe({
+        next: (entries: AuditLogEntry[]) => {
+          this.auditLog.set(entries);
+          resolve();
+        },
+        error: () => {
+          this.notify("Échec du chargement du journal d'activité.");
+          resolve();
+        },
+      });
+    });
+
+    Promise.all([accounts$, devices$, sessions$, audit$]).then(() => {
+      this.loading.set(false);
     });
   }
 
-  /** Applique la recherche aux trois onglets et revient à la première page de chacun. */
+  /**
+   * Applique la recherche sur les trois tableaux et revient à la première page.
+   */
   onSearch(term: string): void {
     this.searchTerm.set(term);
     this.accountsPageIndex.set(0);
@@ -226,13 +263,15 @@ export class UserList {
     this.sessionsPageIndex.set(0);
   }
 
-  /** Reprend la page et la taille de page choisies dans le paginateur des comptes. */
+  /**
+   * Reprend la page et la taille de page choisies dans le paginateur des comptes TOTP.
+   */
   onAccountsPage(event: PageEvent): void {
     this.accountsPageIndex.set(event.pageIndex);
     this.accountsPageSize.set(event.pageSize);
   }
 
-  /** Reprend la page et la taille de page choisies dans le paginateur des appareils. */
+  /** Reprend la page et la taille de page choisies dans le paginateur des appareils de confiance. */
   onDevicesPage(event: PageEvent): void {
     this.devicesPageIndex.set(event.pageIndex);
     this.devicesPageSize.set(event.pageSize);
@@ -351,12 +390,145 @@ export class UserList {
   /** Adresses des applications ouvertes dans la session, séparées par une virgule ; vide si aucune. */
   sessionServices(session: SsoSession): string {
     return Object.values(session.authenticated_services ?? {})
-      .map((s) => s.originalUrl)
+      .map((s: { originalUrl: string }) => s.originalUrl)
       .join(', ');
+  }
+
+  /** Seuil arbitraire mentionné par l'équipe comme signal qu'il faut purger la base - juste un repère visuel, pas de purge automatique. */
+  readonly auditLogCountIsHigh = computed(() => this.auditLogCount() >= 1_000_000);
+
+  /**
+   * Fonction de tri générique : trie un tableau d'objets par la propriété donnée.
+   * Gère les chaînes (insensible à la casse, locale), les nombres et les dates.
+   */
+  private sortFn<T>(data: T[], column: string, defaultDir: 'asc' | 'desc'): T[] {
+    const sortState = this.sortStates.get(column);
+    if (!sortState) return data;
+
+    const sorted = [...data];
+    sorted.sort((a, b) => {
+      const aVal = (a as Record<string, unknown>)[column];
+      const bVal = (b as Record<string, unknown>)[column];
+      const dir = sortState.direction();
+
+      let cmp = 0;
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        cmp = aVal.localeCompare(bVal, 'fr', { sensitivity: 'base' });
+      } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+        cmp = aVal - bVal;
+      } else if (aVal instanceof Date && bVal instanceof Date) {
+        cmp = aVal.getTime() - bVal.getTime();
+      } else {
+        cmp = String(aVal ?? '').localeCompare(String(bVal ?? ''), 'fr', { sensitivity: 'base' });
+      }
+
+      return dir === 'asc' ? cmp : -cmp;
+    });
+
+    return sorted;
+  }
+
+  /**
+   * Bascule le tri sur la colonne donnée.
+   */
+  toggleSort(column: string): void {
+    const sortState = this.sortStates.get(column);
+    if (sortState) {
+      sortState.toggle();
+    }
+  }
+
+  /**
+   * Retourne l'icône de tri pour la colonne donnée.
+   */
+  sortIcon(column: string): string {
+    const sortState = this.sortStates.get(column);
+    if (!sortState) return '';
+    return sortState.icon();
+  }
+
+  /**
+   * Retourne vrai si la colonne est actuellement triée.
+   */
+  isSorted(column: string): boolean {
+    const sortState = this.sortStates.get(column);
+    return sortState ? sortState.active() : false;
   }
 
   /** Annonce un message dans la zone live `<output>` de NotificationService. */
   private notify(message: string): void {
     this.notifications.show(message);
+  }
+
+  // ---- Tri par colonne ----
+
+  /** État de tri pour chaque colonne de chaque tableau. */
+  private readonly sortStates = new Map<string, SortState>();
+
+  // Comptes TOTP
+  private readonly sortUsername = new SortState();
+  private readonly sortName = new SortState();
+  private readonly sortRegistrationDate = new SortState();
+
+  // Appareils de confiance
+  private readonly sortPrincipal = new SortState();
+  private readonly sortDeviceName = new SortState();
+  private readonly sortRecordDate = new SortState();
+  private readonly sortExpirationDate = new SortState();
+
+  // Sessions SSO
+  private readonly sortSessionPrincipal = new SortState();
+  private readonly sortAuthDate = new SortState();
+
+  constructor() {
+    // Associe les états de tri aux colonnes
+    this.sortStates.set('username', this.sortUsername);
+    this.sortStates.set('name', this.sortName);
+    this.sortStates.set('registrationDate', this.sortRegistrationDate);
+    this.sortStates.set('principal', this.sortPrincipal);
+    this.sortStates.set('deviceName', this.sortDeviceName);
+    this.sortStates.set('recordDate', this.sortRecordDate);
+    this.sortStates.set('expirationDate', this.sortExpirationDate);
+    this.sortStates.set('authenticated_principal', this.sortSessionPrincipal);
+    this.sortStates.set('authenticationDate', this.sortAuthDate);
+
+    // Tri par défaut : comptes par username asc, appareils par principal asc, sessions par date desc
+    this.sortUsername.direction.set('asc');
+    this.sortPrincipal.direction.set('asc');
+    this.sortAuthDate.direction.set('desc');
+
+    this.reload();
+  }
+}
+
+// ---- État de tri pour une colonne ----
+
+/** Direction du tri. */
+type SortDirection = 'asc' | 'desc' | '';
+
+/** État de tri réutilisable pour une colonne d'un tableau. */
+class SortState {
+  readonly direction = signal<SortDirection>('');
+
+  /** Bascule : '' → 'asc' → 'desc' → ''. */
+  toggle(): void {
+    if (this.direction() === 'asc') {
+      this.direction.set('desc');
+    } else if (this.direction() === 'desc') {
+      this.direction.set('');
+    } else {
+      this.direction.set('asc');
+    }
+  }
+
+  /** Icône Material. */
+  icon(): string {
+    if (!this.direction()) return '';
+    return this.direction() === 'asc' ? 'arrow_upward' : 'arrow_downward';
+  }
+
+  /** Retourne vrai si trié (asc ou desc). */
+  active(): boolean {
+    return this.direction() !== '';
   }
 }

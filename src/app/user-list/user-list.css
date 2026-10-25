@@ -88,6 +88,30 @@
   text-align: center;
 }
 
+/* En-têtes triables */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  background-color: rgba(0, 68, 90, 0.06);
+}
+
+.sort-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-left: 4px;
+  opacity: 0.4;
+}
+
+.sorted .sort-icon {
+  opacity: 1;
+  color: #00445a;
+}
+
 .actions-cell {
   display: flex;
   flex-wrap: wrap;

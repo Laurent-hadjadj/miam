@@ -36,6 +36,11 @@ interface Data {
  * d'un appareil ou d'une session) avec confirmation, échec et rechargement. Le BFF est simulé par
  * `HttpTestingController` ; `ConfirmService.ask` et `NotificationService.show` sont espionnés.
  */
+/** Attend que toutes les micro-tâches (Promises, Promise.all.then, etc.) soient exécutées. */
+async function flushMicrotasks(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 describe('UserList', () => {
   let http: HttpTestingController;
   let snack: ReturnType<typeof vi.spyOn>;
@@ -55,20 +60,23 @@ describe('UserList', () => {
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
     http = TestBed.inject(HttpTestingController);
     snack = vi.spyOn(NotificationService.prototype, 'show').mockReturnValue(undefined);
-    fixture = TestBed.createComponent(UserList);
-    const component = fixture.componentInstance;
-    flushLoad(data);
-    return component;
+    return createAndFlush(data);
   }
 
-  /** Répond aux requêtes de chargement ; le journal n'est demandé que pour le profil administration. */
+  /** Répond aux requêtes de chargement (le journal est lisible par tous les profils). */
   function flushLoad({ accounts = [], devices = [], sessions = [], audit = [] }: Data): void {
     http.expectOne('/api/gauthCredentialRepository').flush(accounts);
     http.expectOne('/api/multifactorTrustedDevices').flush(devices);
     http.expectOne('/api/ssoSessions').flush({ activeSsoSessions: sessions });
-    if (role === 'admin') {
-      http.expectOne('/bff/audit-log').flush({ entries: audit });
-    }
+    http.expectOne('/bff/audit-log').flush({ entries: audit });
+  }
+
+  /** Crée le composant, lance la détection de changements et répond au chargement initial. */
+  function createAndFlush(data: Data = {}) {
+    fixture = TestBed.createComponent(UserList);
+    fixture.detectChanges();
+    flushLoad(data);
+    return fixture.componentInstance;
   }
 
   beforeEach(() => {
@@ -84,28 +92,27 @@ describe('UserList', () => {
     }
   });
 
-  it('profil consultation : lecture seule, ni boutons de suppression, ni compteur du journal, ni appel au journal', async () => {
+  it('profil consultation : lecture seule, sans boutons de suppression, mais avec le compteur du journal', async () => {
     role = 'consultation';
     setup({ accounts: [account('alice')], devices: [device('alice')], sessions: [ssoSession('alice')] });
-    fixture.detectChanges();
-    await fixture.whenStable();
+    await flushMicrotasks();
     const root = fixture.nativeElement as HTMLElement;
 
     const buttons = Array.from(root.querySelectorAll('tbody tr:first-child button')).map((b) => b.textContent?.trim());
     expect(buttons).toEqual(['🔍 Afficher']);
     expect(root.querySelector('.btn-delete')).toBeNull();
-    expect(root.querySelectorAll('.stat-tile')).toHaveLength(3);
+    expect(root.querySelectorAll('.stat-tile')).toHaveLength(4);
     expect(fixture.componentInstance.loading()).toBe(false);
-    http.expectNone('/bff/audit-log');
   });
 
-  it('calcule les compteurs globaux', () => {
+  it('calcule les compteurs globaux', async () => {
     const component = setup({
       accounts: [account('alice'), account('bob')],
       devices: [device('alice')],
       sessions: [ssoSession('alice')],
       audit: [],
     });
+    await flushMicrotasks();
     expect(component.accountsCount()).toBe(2);
     expect(component.devicesCount()).toBe(1);
     expect(component.sessionsCount()).toBe(1);
@@ -141,7 +148,6 @@ describe('UserList', () => {
 
   it("affiche un message quand il n'y a aucun compte", async () => {
     setup();
-    fixture.detectChanges();
     await fixture.whenStable();
     expect((fixture.nativeElement as HTMLElement).querySelector('.empty-message')?.textContent).toContain('Aucun compte TOTP');
   });
@@ -195,21 +201,24 @@ describe('UserList', () => {
     expect(navigate).toHaveBeenCalledWith(['/users', 'alice']);
   });
 
-  it('signale chaque échec de chargement', () => {
+  it('signale chaque échec de chargement', async () => {
     // Pas de `setup` ici : il répond avec succès, alors que les quatre requêtes doivent échouer.
     sessionStorage.setItem('totp-admin-cas-session', JSON.stringify({ username: 'agent.test', role: 'admin' }));
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
     http = TestBed.inject(HttpTestingController);
     snack = vi.spyOn(NotificationService.prototype, 'show').mockReturnValue(undefined);
-    const fixture = TestBed.createComponent(UserList);
+    const localFixture = TestBed.createComponent(UserList);
+    localFixture.detectChanges();
     const failure = { status: 500, statusText: 'Server Error' };
     http.expectOne('/api/gauthCredentialRepository').flush(null, failure);
     http.expectOne('/api/multifactorTrustedDevices').flush(null, failure);
     http.expectOne('/api/ssoSessions').flush(null, failure);
     http.expectOne('/bff/audit-log').flush(null, failure);
 
+    await flushMicrotasks();
+
     expect(snack).toHaveBeenCalledTimes(4);
-    expect(fixture.componentInstance.loading()).toBe(false);
+    expect(localFixture.componentInstance.loading()).toBe(false);
   });
 
   describe('suppression d\'un compte TOTP', () => {
