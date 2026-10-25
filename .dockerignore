@@ -18,3 +18,11 @@ server/test
 test-results
 coverage
 coverage-bff
+
+# Données locales : journal SQLite (données personnelles), rapports et scripts de développement
+server/data
+playwright-report
+playwright*.config.ts
+skills
+scripts
+commits-a-passer.md

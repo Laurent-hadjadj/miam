@@ -66,3 +66,7 @@ toolz/*
 .npmrc
 
 .scannerwork/*
+skills/miam-architecture.md
+skills/miam-corrections-build.md
+skills/miam-environnement.md
+skills/miam-fonctionnalites.md
