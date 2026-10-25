@@ -83,6 +83,16 @@
   max-width: 420px;
 }
 
+/* L'icône ne doit jamais rétrécir : sinon un message long la tronque. */
+.error-banner mat-icon {
+  flex: 0 0 auto;
+}
+
+.error-banner span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .hero-illustration {
   width: 100%;
 }
