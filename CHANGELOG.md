@@ -4,6 +4,16 @@ Toutes les évolutions notables de MIAM sont documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.3.0] - 2026-11-04
+
+### Modifié
+
+- **Licence** : le code passe de CC BY-NC-SA 4.0 à la **GNU AGPL 3.0 ou ultérieure** (`AGPL-3.0-or-later`) ; la documentation, les logos et les images sont sous **CC BY-SA 4.0**. Les versions publiées jusqu'à la 1.2.0 incluse restent sous leur licence d'origine. Ajout de `LICENSE`, `LICENSING.md` (motif et portée), `NOTICE` (attributions, composants tiers), `LICENSES/CC-BY-NC-SA-4.0.txt` (ancienne licence) et `docs/LICENSE.md` ; en-têtes des fichiers sources (identifiant SPDX), `package.json`, `package-lock.json`, badge et README alignés ; `licence.md` supprimé (doublon) ;
+
+### Corrigé
+
+- **Liste des utilisateurs — tri des colonnes** : seule la première colonne de chaque tableau (identifiant, ou date pour les sessions) était réellement triée ; les autres en-têtes changeaient d'icône sans effet, car chaque tableau n'appliquait qu'une colonne codée en dur. Chaque tableau a maintenant un seul état de tri (colonne + direction) : clic sur une colonne = croissant, deuxième clic = décroissant, troisième = aucun tri ; les dates sont comparées chronologiquement et le tableau revient à la première page. Les clés de colonne des appareils (`name`) et des sessions (`authentication_date_formatted`) sont alignées sur les champs de données. 5 tests ajoutés (133 tests unitaires au total).
+
 ## [1.2.0] - 2026-10-25
 
 ### Ajouté
