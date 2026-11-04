@@ -3,10 +3,10 @@
  *  --------------
  *  Copyright (c) 2015-2026.
  *  Laurent HADJADJ <laurent_h@me.com>.
- *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  SPDX-License-Identifier: AGPL-3.0-or-later.
  *  ---
  *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
- *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ *  https://www.gnu.org/licenses/agpl-3.0.html
  */
 
 /**
@@ -73,7 +73,7 @@ export const LOGO_URL = window.__env?.logoUrl || '';
 /** Auteur affiché dans le pied de page - personnalisable par environnement, même mécanique que LOGO_URL. */
 export const APP_AUTHOR = window.__env?.appAuthor || 'Laurent HADJADJ';
 /** Version affichée dans le pied de page - personnalisable par environnement, même mécanique que LOGO_URL. */
-export const APP_VERSION = window.__env?.appVersion || '1.2.0';
+export const APP_VERSION = window.__env?.appVersion || '1.3.0';
 
 /**
  * Informations RGPD de la page /informations, renseignées par l'organisation qui déploie MIAM
