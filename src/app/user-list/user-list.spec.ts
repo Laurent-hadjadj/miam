@@ -3,10 +3,10 @@
  *  --------------
  *  Copyright (c) 2015-2026.
  *  Laurent HADJADJ <laurent_h@me.com>.
- *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  SPDX-License-Identifier: AGPL-3.0-or-later.
  *  ---
  *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
- *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ *  https://www.gnu.org/licenses/agpl-3.0.html
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -186,6 +186,103 @@ describe('UserList', () => {
     component.onSessionsPage({ pageIndex: 1, pageSize: 50, length: 0 });
     expect(component.devicesPageSize()).toBe(25);
     expect(component.sessionsPageSize()).toBe(50);
+  });
+
+  it('trie par défaut : comptes et appareils par identifiant croissant, sessions par date décroissante', () => {
+    const component = setup({
+      accounts: [account('carl'), account('alice'), account('bob')],
+      devices: [device('carl'), device('alice')],
+      sessions: [
+        ssoSession('alice', { authentication_date_formatted: '2026-10-01T08:00:00Z' }),
+        ssoSession('bob', { authentication_date_formatted: '2026-10-03T08:00:00Z' }),
+        ssoSession('carl', { authentication_date_formatted: '2026-10-02T08:00:00Z' }),
+      ],
+    });
+    expect(component.pagedAccounts().map((a) => a.username)).toEqual(['alice', 'bob', 'carl']);
+    expect(component.pagedDevices().map((d) => d.principal)).toEqual(['alice', 'carl']);
+    expect(component.pagedSessions().map((s) => s.authenticated_principal)).toEqual(['bob', 'carl', 'alice']);
+    expect(component.isSorted('accounts', 'username')).toBe(true);
+    expect(component.isSorted('accounts', 'name')).toBe(false);
+  });
+
+  it('trie chaque colonne des comptes : croissant, décroissant, puis aucun tri', () => {
+    const component = setup({
+      accounts: [
+        account('alice', { name: 'Zèbre', registrationDate: '2026-09-02T08:00:00Z' }),
+        account('bob', { name: 'Abeille', registrationDate: '2026-09-03T08:00:00Z' }),
+        account('carl', { name: 'Mulet', registrationDate: '2026-09-01T08:00:00Z' }),
+      ],
+    });
+    const noms = () => component.pagedAccounts().map((a) => a.username);
+
+    component.toggleSort('accounts', 'name');
+    expect(noms()).toEqual(['bob', 'carl', 'alice']);
+    expect(component.sortIcon('accounts', 'name')).toBe('arrow_upward');
+    expect(component.isSorted('accounts', 'username')).toBe(false);
+    component.toggleSort('accounts', 'name');
+    expect(noms()).toEqual(['alice', 'carl', 'bob']);
+    expect(component.sortIcon('accounts', 'name')).toBe('arrow_downward');
+    component.toggleSort('accounts', 'name');
+    expect(component.isSorted('accounts', 'name')).toBe(false);
+    expect(component.sortIcon('accounts', 'name')).toBe('');
+    expect(noms()).toEqual(['alice', 'bob', 'carl']);
+
+    component.toggleSort('accounts', 'registrationDate');
+    expect(noms()).toEqual(['carl', 'alice', 'bob']);
+    component.toggleSort('accounts', 'registrationDate');
+    expect(noms()).toEqual(['bob', 'alice', 'carl']);
+  });
+
+  it('trie les colonnes des appareils et des sessions, chaque tableau gardant son propre tri', () => {
+    const component = setup({
+      devices: [
+        device('alice', { name: 'Tablette', recordDate: '2026-10-02T08:00:00Z', expirationDate: '2026-10-09T08:00:00Z' }),
+        device('bob', { name: 'Portable', recordDate: '2026-10-01T08:00:00Z', expirationDate: '2026-10-12T08:00:00Z' }),
+      ],
+      sessions: [ssoSession('bob'), ssoSession('alice', { authentication_date_formatted: '2026-10-05T08:00:00Z' })],
+    });
+    const appareils = () => component.pagedDevices().map((d) => d.principal);
+
+    component.toggleSort('devices', 'name');
+    expect(appareils()).toEqual(['bob', 'alice']);
+    component.toggleSort('devices', 'recordDate');
+    expect(appareils()).toEqual(['bob', 'alice']);
+    component.toggleSort('devices', 'recordDate');
+    expect(appareils()).toEqual(['alice', 'bob']);
+    component.toggleSort('devices', 'expirationDate');
+    expect(appareils()).toEqual(['alice', 'bob']);
+    component.toggleSort('devices', 'principal');
+    component.toggleSort('devices', 'principal');
+    expect(appareils()).toEqual(['bob', 'alice']);
+
+    component.toggleSort('sessions', 'authenticated_principal');
+    expect(component.pagedSessions().map((s) => s.authenticated_principal)).toEqual(['alice', 'bob']);
+    component.toggleSort('sessions', 'authentication_date_formatted');
+    expect(component.pagedSessions().map((s) => s.authenticated_principal)).toEqual(['bob', 'alice']);
+    // Le tri des sessions n'a pas modifié celui des appareils.
+    expect(component.isSorted('devices', 'principal')).toBe(true);
+  });
+
+  it('revient à la première page quand on change le tri', () => {
+    const component = setup({ accounts: Array.from({ length: 12 }, (_, i) => account(`user${i}`)) });
+    component.onAccountsPage({ pageIndex: 1, pageSize: 10, length: 12 });
+    component.toggleSort('accounts', 'name');
+    expect(component.accountsPageIndex()).toBe(0);
+  });
+
+  it('un clic sur chaque en-tête de colonne trie le tableau affiché', async () => {
+    setup({ accounts: [account('alice', { name: 'Zèbre' }), account('bob', { name: 'Abeille' })] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const headers = Array.from(root.querySelectorAll('table.data-table')[0].querySelectorAll('th.sortable')) as HTMLElement[];
+    const premiere = () => root.querySelector('table.data-table tbody tr td')?.textContent?.trim();
+
+    headers[1].click();
+    fixture.detectChanges();
+    expect(premiere()).toContain('bob');
+    expect(headers[1].getAttribute('aria-sort')).toBe('ascending');
+    expect(headers[0].getAttribute('aria-sort')).toBe('none');
   });
 
   it('liste les applications d\'une session SSO', () => {

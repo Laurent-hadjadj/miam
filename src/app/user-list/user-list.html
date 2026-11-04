@@ -35,9 +35,9 @@
     <mat-tab [label]="'Comptes TOTP (' + filteredAccounts().length + ')'">
       <table mat-table [dataSource]="pagedAccounts()" class="data-table" aria-label="Comptes TOTP">
         <ng-container matColumnDef="username">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('username')" class="sortable" [class.sorted]="isSorted('username')" aria-sort="{{ isSorted('username') ? (sortIcon('username') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('accounts', 'username')" class="sortable" [class.sorted]="isSorted('accounts', 'username')" aria-sort="{{ isSorted('accounts', 'username') ? (sortIcon('accounts', 'username') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Identifiant
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('username') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('accounts', 'username') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let account">
             <!-- Session : pastille décorative (disque plein = active, contour vide = aucune), doublée d'un texte pour les lecteurs d'écran. -->
@@ -48,17 +48,17 @@
         </ng-container>
 
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('name')" class="sortable" [class.sorted]="isSorted('name')" aria-sort="{{ isSorted('name') ? (sortIcon('name') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('accounts', 'name')" class="sortable" [class.sorted]="isSorted('accounts', 'name')" aria-sort="{{ isSorted('accounts', 'name') ? (sortIcon('accounts', 'name') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Appareil
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('name') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('accounts', 'name') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let account">{{ account.name }}</td>
         </ng-container>
 
         <ng-container matColumnDef="registrationDate">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('registrationDate')" class="sortable" [class.sorted]="isSorted('registrationDate')" aria-sort="{{ isSorted('registrationDate') ? (sortIcon('registrationDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('accounts', 'registrationDate')" class="sortable" [class.sorted]="isSorted('accounts', 'registrationDate')" aria-sort="{{ isSorted('accounts', 'registrationDate') ? (sortIcon('accounts', 'registrationDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Enrôlé le
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('registrationDate') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('accounts', 'registrationDate') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let account">{{ account.registrationDate | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
@@ -98,9 +98,9 @@
     <mat-tab [label]="'Appareils de confiance (' + filteredDevices().length + ')'">
       <table mat-table [dataSource]="pagedDevices()" class="data-table" aria-label="Appareils de confiance">
         <ng-container matColumnDef="principal">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('principal')" class="sortable" [class.sorted]="isSorted('principal')" aria-sort="{{ isSorted('principal') ? (sortIcon('principal') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('devices', 'principal')" class="sortable" [class.sorted]="isSorted('devices', 'principal')" aria-sort="{{ isSorted('devices', 'principal') ? (sortIcon('devices', 'principal') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Identifiant
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('principal') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('devices', 'principal') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let device">
             <span class="status-dot" [class.active]="hasActiveSession(device.principal)" aria-hidden="true"></span>
@@ -110,25 +110,25 @@
         </ng-container>
 
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('deviceName')" class="sortable" [class.sorted]="isSorted('deviceName')" aria-sort="{{ isSorted('deviceName') ? (sortIcon('deviceName') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('devices', 'name')" class="sortable" [class.sorted]="isSorted('devices', 'name')" aria-sort="{{ isSorted('devices', 'name') ? (sortIcon('devices', 'name') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Appareil
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('deviceName') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('devices', 'name') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let device">{{ device.name }}</td>
         </ng-container>
 
         <ng-container matColumnDef="recordDate">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('recordDate')" class="sortable" [class.sorted]="isSorted('recordDate')" aria-sort="{{ isSorted('recordDate') ? (sortIcon('recordDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('devices', 'recordDate')" class="sortable" [class.sorted]="isSorted('devices', 'recordDate')" aria-sort="{{ isSorted('devices', 'recordDate') ? (sortIcon('devices', 'recordDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Enregistré le
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('recordDate') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('devices', 'recordDate') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let device">{{ device.recordDate | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="expirationDate">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('expirationDate')" class="sortable" [class.sorted]="isSorted('expirationDate')" aria-sort="{{ isSorted('expirationDate') ? (sortIcon('expirationDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('devices', 'expirationDate')" class="sortable" [class.sorted]="isSorted('devices', 'expirationDate')" aria-sort="{{ isSorted('devices', 'expirationDate') ? (sortIcon('devices', 'expirationDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Expire le
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('expirationDate') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('devices', 'expirationDate') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let device">{{ device.expirationDate | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
@@ -168,17 +168,17 @@
     <mat-tab [label]="'Sessions SSO (' + filteredSessions().length + ')'">
       <table mat-table [dataSource]="pagedSessions()" class="data-table" aria-label="Sessions SSO">
         <ng-container matColumnDef="principal">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('authenticated_principal')" class="sortable" [class.sorted]="isSorted('authenticated_principal')" aria-sort="{{ isSorted('authenticated_principal') ? (sortIcon('authenticated_principal') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('sessions', 'authenticated_principal')" class="sortable" [class.sorted]="isSorted('sessions', 'authenticated_principal')" aria-sort="{{ isSorted('sessions', 'authenticated_principal') ? (sortIcon('sessions', 'authenticated_principal') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Identifiant
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('authenticated_principal') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('sessions', 'authenticated_principal') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let session">{{ session.authenticated_principal }}</td>
         </ng-container>
 
         <ng-container matColumnDef="authenticationDate">
-          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('authenticationDate')" class="sortable" [class.sorted]="isSorted('authenticationDate')" aria-sort="{{ isSorted('authenticationDate') ? (sortIcon('authenticationDate') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
+          <th mat-header-cell *matHeaderCellDef (click)="toggleSort('sessions', 'authentication_date_formatted')" class="sortable" [class.sorted]="isSorted('sessions', 'authentication_date_formatted')" aria-sort="{{ isSorted('sessions', 'authentication_date_formatted') ? (sortIcon('sessions', 'authentication_date_formatted') === 'arrow_upward' ? 'ascending' : 'descending') : 'none' }}">
             Authentifié le
-            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('authenticationDate') }}</mat-icon>
+            <mat-icon class="sort-icon" aria-hidden="true">{{ sortIcon('sessions', 'authentication_date_formatted') }}</mat-icon>
           </th>
           <td mat-cell *matCellDef="let session">{{ session.authentication_date_formatted | date: 'dd/MM/yyyy HH:mm' : 'UTC' }}</td>
         </ng-container>

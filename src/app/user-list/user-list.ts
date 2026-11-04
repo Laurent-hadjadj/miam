@@ -3,14 +3,14 @@
  *  --------------
  *  Copyright (c) 2015-2026.
  *  Laurent HADJADJ <laurent_h@me.com>.
- *  Licensed Creative Common CC-BY-NC-SA 4.0.
+ *  SPDX-License-Identifier: AGPL-3.0-or-later.
  *  ---
  *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
- *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ *  https://www.gnu.org/licenses/agpl-3.0.html
  */
 
 
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, WritableSignal, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -164,7 +164,7 @@ export class UserList {
    * Tranches filtrées ET triées, puis paginées pour les comptes TOTP.
    */
   readonly pagedAccounts = computed(() => {
-    const data = this.sortFn(this.filteredAccounts(), 'username', 'asc');
+    const data = this.sortFn(this.filteredAccounts(), this.sorts.accounts());
     const start = this.accountsPageIndex() * this.accountsPageSize();
     return data.slice(start, start + this.accountsPageSize());
   });
@@ -173,7 +173,7 @@ export class UserList {
    * Tranches filtrées ET triées, puis paginées pour les appareils de confiance.
    */
   readonly pagedDevices = computed(() => {
-    const data = this.sortFn(this.filteredDevices(), 'principal', 'asc');
+    const data = this.sortFn(this.filteredDevices(), this.sorts.devices());
     const start = this.devicesPageIndex() * this.devicesPageSize();
     return data.slice(start, start + this.devicesPageSize());
   });
@@ -182,7 +182,7 @@ export class UserList {
    * Tranches filtrées ET triées, puis paginées pour les sessions SSO.
    */
   readonly pagedSessions = computed(() => {
-    const data = this.sortFn(this.filteredSessions(), 'authenticationDate', 'desc');
+    const data = this.sortFn(this.filteredSessions(), this.sorts.sessions());
     const start = this.sessionsPageIndex() * this.sessionsPageSize();
     return data.slice(start, start + this.sessionsPageSize());
   });
@@ -398,61 +398,57 @@ export class UserList {
   readonly auditLogCountIsHigh = computed(() => this.auditLogCount() >= 1_000_000);
 
   /**
-   * Fonction de tri générique : trie un tableau d'objets par la propriété donnée.
-   * Gère les chaînes (insensible à la casse, locale), les nombres et les dates.
+   * Trie un tableau d'objets selon l'état de tri du tableau (colonne + direction).
+   * Chaînes comparées sans tenir compte de la casse ni des accents, dates comparées en chronologique.
+   * Sans direction (tri désactivé), l'ordre d'origine est conservé.
    */
-  private sortFn<T>(data: T[], column: string, defaultDir: 'asc' | 'desc'): T[] {
-    const sortState = this.sortStates.get(column);
-    if (!sortState) return data;
+  private sortFn<T>(data: T[], sort: TableSort): T[] {
+    if (!sort.direction) return data;
+    const { column, direction } = sort;
+    const isDate = DATE_COLUMNS.has(column);
 
     const sorted = [...data];
     sorted.sort((a, b) => {
       const aVal = (a as Record<string, unknown>)[column];
       const bVal = (b as Record<string, unknown>)[column];
-      const dir = sortState.direction();
 
-      let cmp = 0;
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        cmp = aVal.localeCompare(bVal, 'fr', { sensitivity: 'base' });
-      } else if (typeof aVal === 'number' && typeof bVal === 'number') {
-        cmp = aVal - bVal;
-      } else if (aVal instanceof Date && bVal instanceof Date) {
-        cmp = aVal.getTime() - bVal.getTime();
+      let cmp: number;
+      if (isDate) {
+        cmp = (Date.parse(String(aVal ?? '')) || 0) - (Date.parse(String(bVal ?? '')) || 0);
       } else {
         cmp = String(aVal ?? '').localeCompare(String(bVal ?? ''), 'fr', { sensitivity: 'base' });
       }
-
-      return dir === 'asc' ? cmp : -cmp;
+      return direction === 'asc' ? cmp : -cmp;
     });
-
     return sorted;
   }
 
   /**
-   * Bascule le tri sur la colonne donnée.
+   * Bascule le tri d'une colonne d'un tableau : une nouvelle colonne démarre en croissant ;
+   * la colonne déjà triée passe de croissant à décroissant, puis à aucun tri. Une seule colonne
+   * est triée par tableau. Le tableau revient à la première page.
    */
-  toggleSort(column: string): void {
-    const sortState = this.sortStates.get(column);
-    if (sortState) {
-      sortState.toggle();
+  toggleSort(table: SortTable, column: string): void {
+    const current = this.sorts[table]();
+    let direction: SortDirection = 'asc';
+    if (current.column === column) {
+      direction = current.direction === 'asc' ? 'desc' : current.direction === 'desc' ? '' : 'asc';
     }
+    this.sorts[table].set({ column, direction });
+    this.pageIndexes[table].set(0);
   }
 
-  /**
-   * Retourne l'icône de tri pour la colonne donnée.
-   */
-  sortIcon(column: string): string {
-    const sortState = this.sortStates.get(column);
-    if (!sortState) return '';
-    return sortState.icon();
+  /** Retourne l'icône de tri de la colonne (vide si elle n'est pas triée). */
+  sortIcon(table: SortTable, column: string): string {
+    const sort = this.sorts[table]();
+    if (sort.column !== column || !sort.direction) return '';
+    return sort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward';
   }
 
-  /**
-   * Retourne vrai si la colonne est actuellement triée.
-   */
-  isSorted(column: string): boolean {
-    const sortState = this.sortStates.get(column);
-    return sortState ? sortState.active() : false;
+  /** Retourne vrai si la colonne est actuellement triée dans ce tableau. */
+  isSorted(table: SortTable, column: string): boolean {
+    const sort = this.sorts[table]();
+    return sort.column === column && sort.direction !== '';
   }
 
   /** Annonce un message dans la zone live `<output>` de NotificationService. */
@@ -462,73 +458,38 @@ export class UserList {
 
   // ---- Tri par colonne ----
 
-  /** État de tri pour chaque colonne de chaque tableau. */
-  private readonly sortStates = new Map<string, SortState>();
+  /** Colonne et sens de tri de chaque tableau : comptes par identifiant, appareils par identifiant, sessions par date décroissante. */
+  private readonly sorts: Record<SortTable, WritableSignal<TableSort>> = {
+    accounts: signal<TableSort>({ column: 'username', direction: 'asc' }),
+    devices: signal<TableSort>({ column: 'principal', direction: 'asc' }),
+    sessions: signal<TableSort>({ column: 'authentication_date_formatted', direction: 'desc' }),
+  };
 
-  // Comptes TOTP
-  private readonly sortUsername = new SortState();
-  private readonly sortName = new SortState();
-  private readonly sortRegistrationDate = new SortState();
-
-  // Appareils de confiance
-  private readonly sortPrincipal = new SortState();
-  private readonly sortDeviceName = new SortState();
-  private readonly sortRecordDate = new SortState();
-  private readonly sortExpirationDate = new SortState();
-
-  // Sessions SSO
-  private readonly sortSessionPrincipal = new SortState();
-  private readonly sortAuthDate = new SortState();
+  /** Page courante de chaque tableau. */
+  private readonly pageIndexes: Record<SortTable, WritableSignal<number>> = {
+    accounts: this.accountsPageIndex,
+    devices: this.devicesPageIndex,
+    sessions: this.sessionsPageIndex,
+  };
 
   constructor() {
-    // Associe les états de tri aux colonnes
-    this.sortStates.set('username', this.sortUsername);
-    this.sortStates.set('name', this.sortName);
-    this.sortStates.set('registrationDate', this.sortRegistrationDate);
-    this.sortStates.set('principal', this.sortPrincipal);
-    this.sortStates.set('deviceName', this.sortDeviceName);
-    this.sortStates.set('recordDate', this.sortRecordDate);
-    this.sortStates.set('expirationDate', this.sortExpirationDate);
-    this.sortStates.set('authenticated_principal', this.sortSessionPrincipal);
-    this.sortStates.set('authenticationDate', this.sortAuthDate);
-
-    // Tri par défaut : comptes par username asc, appareils par principal asc, sessions par date desc
-    this.sortUsername.direction.set('asc');
-    this.sortPrincipal.direction.set('asc');
-    this.sortAuthDate.direction.set('desc');
-
     this.reload();
   }
 }
 
-// ---- État de tri pour une colonne ----
+// ---- État de tri d'un tableau ----
 
-/** Direction du tri. */
+/** Tableaux triables de la page. */
+type SortTable = 'accounts' | 'devices' | 'sessions';
+
+/** Direction du tri ('' = aucun tri). */
 type SortDirection = 'asc' | 'desc' | '';
 
-/** État de tri réutilisable pour une colonne d'un tableau. */
-class SortState {
-  readonly direction = signal<SortDirection>('');
-
-  /** Bascule : '' → 'asc' → 'desc' → ''. */
-  toggle(): void {
-    if (this.direction() === 'asc') {
-      this.direction.set('desc');
-    } else if (this.direction() === 'desc') {
-      this.direction.set('');
-    } else {
-      this.direction.set('asc');
-    }
-  }
-
-  /** Icône Material. */
-  icon(): string {
-    if (!this.direction()) return '';
-    return this.direction() === 'asc' ? 'arrow_upward' : 'arrow_downward';
-  }
-
-  /** Retourne vrai si trié (asc ou desc). */
-  active(): boolean {
-    return this.direction() !== '';
-  }
+/** Colonne triée et sens du tri d'un tableau. */
+interface TableSort {
+  column: string;
+  direction: SortDirection;
 }
+
+/** Colonnes contenant des dates (comparées chronologiquement et non alphabétiquement). */
+const DATE_COLUMNS = new Set(['registrationDate', 'recordDate', 'expirationDate', 'authentication_date_formatted']);
