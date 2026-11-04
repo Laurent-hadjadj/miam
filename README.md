@@ -5,7 +5,7 @@
 [![Node](./docs/shields/nodejs.svg)](https://nodejs.org/)
 [![Tests](./docs/shields/test.svg)](docs/developpement/test-unitaire.md)
 [![Coverage](./docs/shields/couverture.svg)](docs/developpement/test-unitaire.md)
-[![Licence](/docs/shields/licence.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![Licence](/docs/shields/licence.svg)](LICENSE)
 
 ```text
 .___  ___.  __       ___      .___  ___.
@@ -34,11 +34,11 @@ _
 ## 1️⃣ Licence
 
 > [!NOTE]
-> MIAM est distribuée sous licence **[Creative Commons CC BY-NC-SA 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)** :
+> 
+> - **Code** : [GNU AGPL 3.0 ou ultérieure](LICENSE) (`AGPL-3.0-or-later`), licence à copyleft : le logiciel reste ouvert, y compris lorsqu'il est proposé comme service web.
+> - **Documentation et images** (`README.md`, dossier `docs/`, logos et images) : [CC BY-SA 4.0](docs/LICENSE.md).
 >
-> - citer l'auteur (**BY**),
-> - pas d'usage commercial (**NC**),
-> - partage sous la même licence (**SA**).
+> **Changement de licence.** Depuis le 4 novembre 2026, le code est distribué sous AGPL 3.0. Jusqu'à la version 1.2.0 incluse, il était publié sous [CC BY-NC-SA 4.0](LICENSES/CC-BY-NC-SA-4.0.txt) ; ces versions restent sous cette licence. L'usage commercial est désormais autorisé, à condition de respecter le copyleft. Les en-têtes des fichiers sources portent l'identifiant SPDX `AGPL-3.0-or-later`. **Motif et portée du changement : [LICENSING.md](LICENSING.md)**. Attributions : [NOTICE](NOTICE).
 
 ## 2️⃣ Fonctionnalités disponibles
 

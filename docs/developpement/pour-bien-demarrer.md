@@ -75,7 +75,7 @@ _
 
 ## 5️⃣ Conventions
 
-- **En-tête de licence** (CC BY-NC-SA 4.0) en tête de chaque fichier source ;
+- **En-tête de licence** (`SPDX-License-Identifier: AGPL-3.0-or-later`) en tête de chaque fichier source ;
 - composants *standalone*, **signaux** pour l'état, nommage Angular sans suffixe `Component` ;
 - **aucun style inline** (ni `style=""` ni `[style.x]`) : classes CSS, éventuellement posées selon le point de rupture ;
 - points de rupture via `ResponsiveService`, pas de `@media` isolée pour piloter un comportement (les `@media` de présentation pure restent acceptées) ;

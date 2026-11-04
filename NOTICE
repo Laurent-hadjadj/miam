@@ -1,0 +1,19 @@
+MIAM - MFA Incident Access Management
+Copyright 2015-2026 Laurent HADJADJ
+
+Ce produit est distribué sous licence GNU Affero General Public License, version 3 ou ultérieure (AGPL-3.0-or-later), voir le fichier LICENSE.
+La documentation (README.md, le dossier docs/) et les images (design/, public/images/, public/favicon/) sont distribuées sous licence CC BY-SA 4.0 (voir docs/LICENSE.md).
+
+Historique des licences
+-----------------------
+- Jusqu'à la version 1.2.0 incluse, le projet était publié avec CC BY-NC-SA 4.0. Le texte de la licence Creative Commons CC BY-NC-SA 4.0 est conservé dans LICENSES/CC-BY-NC-SA-4.0.txt. Les copies déjà distribuées restent utilisables selon la licence qui les accompagnait.
+- À partir du 4 novembre 2026, le projet est distribué sous licence AGPL 3.0 par son titulaire des droits. L'historique git n'est pas modifié : les commits antérieurs à cette date restent attachés à la licence en vigueur à leur publication.
+- Les en-têtes des fichiers sources portent l'identifiant SPDX AGPL-3.0-or-later. Ils ne concernent que les versions publiées à partir du 4 novembre 2026. En cas de contradiction, le fichier LICENSE prévaut.
+- Une explication détaillée du changement et de sa portée se trouve dans LICENSING.md.
+
+Éléments tiers
+--------------
+- Dépendances npm de production (Angular, Express et autres, voir package.json) : elles conservent leur propre licence (MIT, ISC, Apache 2.0, BSD), compatibles avec l'AGPL 3.0. La police @fontsource/roboto est sous SIL Open Font License 1.1.
+- Outils de développement (tests, analyse, compilation : axe-core et lightningcss sous MPL 2.0, caniuse-lite sous CC BY 4.0, etc.) : ils ne sont pas distribués avec l'application et gardent leur propre licence.
+- Logos, favicons et images (dossiers design/, public/images/ et public/favicon/) : distribués sous licence CC BY-SA 4.0, comme la documentation (voir docs/LICENSE.md).
+- MIAM s'interface avec un serveur CAS (Apereo CAS, Apache 2.0) qui n'est pas distribué avec ce dépôt.

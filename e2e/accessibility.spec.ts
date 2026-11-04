@@ -3,10 +3,10 @@
  *  --------------
  *  Copyright (c) 2015-2026.
  *  Laurent HADJADJ <laurent_h@me.com>.
- *  Licensed Creative Common  CC-BY-NC-SA 4.0.
+ *  SPDX-License-Identifier: AGPL-3.0-or-later.
  *  ---
  *  Vous pouvez obtenir une copie de la licence à l'adresse suivante :
- *  http://creativecommons.org/licenses/by-nc-sa/4.0/
+ *  https://www.gnu.org/licenses/agpl-3.0.html
  */
 
 /**
@@ -43,7 +43,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'];
  *
  * Created at: 15/10/2026 12:31:11 (Europe/Paris)
  * @author     Laurent HADJADJ <laurent_h@me.com>
- * @copyright  Licensed Ma-Moulinette - Creative Common CC-BY-NC-SA 4.0.
+ * @copyright  Licensed Ma-Moulinette - AGPL-3.0-or-later.
  */
 async function setTheme(page: Page, theme: string): Promise<void> {
   await page.context().addCookies([{ name: 'miam-theme', value: theme, url: 'http://localhost:4200' }]);
@@ -58,7 +58,7 @@ async function setTheme(page: Page, theme: string): Promise<void> {
  *
  * Created at: 15/10/2026 12:31:07 (Europe/Paris)
  * @author     Laurent HADJADJ <laurent_h@me.com>
- * @copyright  Licensed Ma-Moulinette - Creative Common CC-BY-NC-SA 4.0.
+ * @copyright  Licensed Ma-Moulinette - AGPL-3.0-or-later.
  */
 async function expectNoViolations(page: Page): Promise<void> {
   const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
@@ -79,7 +79,7 @@ async function expectNoViolations(page: Page): Promise<void> {
  *
  * Created at: 15/10/2026 12:31:02 (Europe/Paris)
  * @author     Laurent HADJADJ <laurent_h@me.com>
- * @copyright  Licensed Ma-Moulinette - Creative Common CC-BY-NC-SA 4.0.
+ * @copyright  Licensed Ma-Moulinette - AGPL-3.0-or-later.
  */
 async function seed(page: Page): Promise<void> {
   await withSession(page);
