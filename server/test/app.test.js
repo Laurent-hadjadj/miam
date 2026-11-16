@@ -383,6 +383,31 @@ test('fallback SPA : une route Angular renvoie index.html', async () => {
   }
 });
 
+test('fichiers statiques : servis sans session ni cookie, sans masquer la configuration dynamique /env.js', async () => {
+  const dossier = fs.mkdtempSync(path.join(os.tmpdir(), 'miam-build-'));
+  fs.writeFileSync(path.join(dossier, 'index.html'), '<html>SPA</html>');
+  fs.writeFileSync(path.join(dossier, 'main.js'), 'console.log("app");');
+  fs.writeFileSync(path.join(dossier, 'env.js'), 'window.__env = { placeholder: true };');
+  const bff = await startBff({ staticDir: dossier });
+  try {
+    const fichier = await bff.request('GET', '/main.js');
+    assert.equal(fichier.status, 200);
+    assert.equal(await fichier.text(), 'console.log("app");');
+    assert.equal(fichier.headers.getSetCookie().length, 0);
+
+    // Le env.js embarqué par le build (valeurs de développement) ne remplace pas la route dynamique.
+    const env = await (await bff.request('GET', '/env.js')).text();
+    assert.ok(env.includes('"appVersion":"9.9.9"'));
+    assert.ok(!env.includes('placeholder'));
+
+    // Les routes protégées restent derrière la session.
+    assert.equal((await bff.request('GET', '/api/gauthCredentialRepository')).status, 401);
+  } finally {
+    await bff.stop();
+    fs.rmSync(dossier, { recursive: true, force: true });
+  }
+});
+
 test('point de santé : public, OK quand le journal et CAS répondent', async () => {
   const bff = await startBff();
   try {
