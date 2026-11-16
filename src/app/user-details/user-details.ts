@@ -224,7 +224,7 @@ export class UserDetails {
 
   /** Retourne à la liste des utilisateurs (destination fixe, contrairement à l'historique du navigateur). */
   onBack(): void {
-    this.router.navigate(['/users']);
+    void this.router.navigate(['/users']);
   }
 
   /** Annonce un message dans la zone live `<output>` de NotificationService. */

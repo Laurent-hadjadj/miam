@@ -248,7 +248,7 @@ export class UserList {
       });
     });
 
-    Promise.all([accounts$, devices$, sessions$, audit$]).then(() => {
+    void Promise.all([accounts$, devices$, sessions$, audit$]).then(() => {
       this.loading.set(false);
     });
   }
@@ -285,7 +285,7 @@ export class UserList {
 
   /** Ouvre la fiche (`/users/<identifiant>`) d'un utilisateur ; sert aux trois onglets. */
   viewAccount(username: string): void {
-    this.router.navigate(['/users', username]);
+    void this.router.navigate(['/users', username]);
   }
 
   /**

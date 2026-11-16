@@ -271,7 +271,7 @@ export class Journal {
 
   /** Ouvre la fiche (`/users/<identifiant>`) du compte concerné par une entrée. */
   viewTarget(username: string): void {
-    this.router.navigate(['/users', username]);
+    void this.router.navigate(['/users', username]);
   }
 
   /** Libellé français d'un code d'action ; un code inconnu (version plus récente du BFF) est affiché tel quel. */

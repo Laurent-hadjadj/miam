@@ -10,7 +10,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { AppFooter } from './app-footer';
+import { AppFooter, abbreviateAuthor } from './app-footer';
 
 /**
  * Vérifie le contenu du pied de page : année courante, auteur dans ses deux variantes (complète et
@@ -26,7 +26,16 @@ describe('AppFooter', () => {
     expect(root.querySelector('.footer-left')?.textContent).toContain(`© ${new Date().getFullYear()}`);
     expect(root.querySelector('.author-full')?.textContent).toBe('Laurent HADJADJ');
     expect(root.querySelector('.author-short')?.textContent).toBe('L. HADJADJ');
-    expect(root.querySelector('.footer-center')?.textContent).toContain('CC-NC-BY-SA 4.0');
+    expect(root.querySelector('.footer-center')?.textContent).toContain('AGPL 3.0');
     expect(root.querySelector('.footer-right')?.textContent).toMatch(/^v\d+\.\d+\.\d+/);
+  });
+
+  it('abrège le prénom en initiale, sans modifier un nom sans prénom', () => {
+    expect(abbreviateAuthor('Laurent HADJADJ')).toBe('L. HADJADJ');
+    expect(abbreviateAuthor('Jean Pierre   DUPONT')).toBe('J. Pierre   DUPONT');
+    expect(abbreviateAuthor('HADJADJ')).toBe('HADJADJ');
+    expect(abbreviateAuthor('Laurent ')).toBe('Laurent ');
+    expect(abbreviateAuthor(' Laurent')).toBe(' Laurent');
+    expect(abbreviateAuthor('')).toBe('');
   });
 });

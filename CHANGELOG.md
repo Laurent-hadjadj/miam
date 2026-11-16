@@ -4,6 +4,20 @@ Toutes les évolutions notables de MIAM sont documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.3.1] - 2026-11-16
+
+### Sécurité
+
+- **BFF — ordre des middlewares (SonarQube)** : le middleware des fichiers statiques passait après la session, donc chaque requête de fichier traversait le traitement de session. Il est déclaré avant, après les routes publiques (`/api/public/healthcheck/status`, `/env.js`) : il ne doit pas masquer `/env.js`, dont le build embarque une version de développement. Un test vérifie que les fichiers sont servis sans cookie, que `/env.js` reste dynamique et que `/api` reste protégé (54 tests BFF).
+
+### Corrigé
+
+- **Promesses non attendues (SonarQube, 6 bugs moyens)** : les navigations du routeur (`navigate`, `navigateByUrl`) de `home.ts`, `journal.ts`, `user-details.ts` et `user-list.ts`, ainsi que le `Promise.all(...).then(...)` du chargement de la liste, sont explicitement marquées comme ignorées (opérateur `void`). Aucun changement de comportement ;
+- **Expressions régulières à retour arrière (SonarQube, 2 bugs)** : l'abréviation du nom de l'auteur du pied de page (`/^(S)S*s+(.+)$/`, remplacée par la fonction `abbreviateAuthor`, linéaire) et le retrait des « / » finaux des adresses CAS (`trimTrailingSlashes` de `server/config.js`, une boucle) ne peuvent plus ralentir sur une valeur de configuration pathologique ;
+- **`Number.parseInt` (SonarQube, 2 bugs)** : le décodage des entités XML de `server/roles.js` utilise `Number.parseInt` ;
+- **Licence affichée** : le pied de page de l'application et le commentaire de `index.html` indiquaient encore « CC-NC-BY-SA 4.0 » ; ils affichent « AGPL 3.0 ». 1 test ajouté (134 tests unitaires) ;
+- **Mauvaises pratiques SonarQube (9)** : la sortie `search` de la barre de recherche, nommée comme un événement DOM standard, est renommée `searchChange` (`(searchChange)` dans la liste des utilisateurs) ; 8 tests sans assertion explicite (`user-list.spec.ts`, `account-admin.service.spec.ts`, `actuator-services.spec.ts`) vérifient maintenant le résultat de l'appel ou l'absence de notification, en plus de `HttpTestingController`.
+
 ## [1.3.0] - 2026-11-04
 
 ### Modifié

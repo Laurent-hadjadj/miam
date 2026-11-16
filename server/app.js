@@ -244,26 +244,10 @@ function createApp(config) {
   app.set('trust proxy', config.trustProxy ?? 0);
   app.use(securityHeaders);
 
-  // Le cookie ne contient que l'identifiant de session ; le nom d'agent et le profil restent côté
-  // serveur. `saveUninitialized: false` : aucun cookie n'est émis avant l'ouverture d'une session.
-  app.use(
-    session({
-      name: SESSION_COOKIE,
-      secret: config.sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      // Store mémoire par défaut : suffisant pour une instance unique, mais
-      // un redémarrage du module BFF invalide les sessions en cours.
-      cookie: {
-        httpOnly: true,
-        secure: config.cookieSecure,
-        sameSite: 'lax',
-        // Aligné sur cas.ticket.tgt.primary.max-time-to-live-in-seconds côté
-        // CAS (8h) : la session BFF ne doit pas survivre au TGT qu'elle représente.
-        maxAge: 8 * 60 * 60 * 1000,
-      },
-    }),
-  );
+  // Ordre des intergiciels : les routes publiques (santé, /env.js) puis les fichiers statiques passent
+  // AVANT la session, pour qu'une requête de fichier ne déclenche ni lecture ni création de session
+  // (économie de ressources, pas de cookie sur les ressources). Les routes /bff et /api, qui en ont besoin,
+  // viennent après la session.
 
   /**
    * Point de santé public (sans session, sans secret) pour l'orchestrateur ou la supervision.
@@ -296,6 +280,32 @@ function createApp(config) {
       })};`,
     );
   });
+
+  // Application Angular compilée. Déclarée après /env.js : le build embarque un `env.js` de développement
+  // (public/env.js) qui masquerait sinon la configuration dynamique. Aucun fichier du build ne porte le nom
+  // de /api ou /bff.
+  app.use(express.static(config.staticDir));
+
+  // Le cookie ne contient que l'identifiant de session ; le nom d'agent et le profil restent côté
+  // serveur. `saveUninitialized: false` : aucun cookie n'est émis avant l'ouverture d'une session.
+  app.use(
+    session({
+      name: SESSION_COOKIE,
+      secret: config.sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+      // Store mémoire par défaut : suffisant pour une instance unique, mais
+      // un redémarrage du module BFF invalide les sessions en cours.
+      cookie: {
+        httpOnly: true,
+        secure: config.cookieSecure,
+        sameSite: 'lax',
+        // Aligné sur cas.ticket.tgt.primary.max-time-to-live-in-seconds côté
+        // CAS (8h) : la session BFF ne doit pas survivre au TGT qu'elle représente.
+        maxAge: 8 * 60 * 60 * 1000,
+      },
+    }),
+  );
 
   /**
    * Valide le ticket CAS côté serveur (jamais exposé au navigateur) et ouvre la session BFF.
@@ -420,8 +430,6 @@ function createApp(config) {
     return res.status(upstream.status).type(contentType).send(body);
   });
 
-  // Application Angular compilée, déclarée après /api et /bff pour qu'aucun fichier ne les masque.
-  app.use(express.static(config.staticDir));
   // Fallback SPA Angular (/users/xxx, /deconnexion...) : renvoie index.html
   // pour toute route non reconnue. `app.use` sans motif : Express 5 n'accepte
   // plus le wildcard nu.

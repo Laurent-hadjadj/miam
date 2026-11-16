@@ -93,7 +93,7 @@ export class Home implements OnInit {
    */
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      this.router.navigateByUrl('/users');
+      void this.router.navigateByUrl('/users');
       return;
     }
 
@@ -110,7 +110,7 @@ export class Home implements OnInit {
     this.authService.validateTicket(ticket).subscribe((result) => {
       this.validating.set(false);
       if (result === 'ok') {
-        this.router.navigateByUrl('/users');
+        void this.router.navigateByUrl('/users');
       } else if (result === 'non-habilite') {
         this.error.set(
           "Accès refusé : votre compte est authentifié mais n'est habilité à aucun profil de MIAM. Contactez l'administrateur de l'application.",

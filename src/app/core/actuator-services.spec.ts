@@ -37,32 +37,44 @@ describe('Services d\'accès à l\'actuator (via le BFF)', () => {
   describe('GauthCredentialService', () => {
     it('liste tous les comptes, puis ceux d\'un utilisateur (identifiant encodé)', () => {
       const service = TestBed.inject(GauthCredentialService);
-      service.getAll().subscribe();
-      http.expectOne({ method: 'GET', url: '/api/gauthCredentialRepository' }).flush([]);
-      service.getByUsername('a b/c').subscribe();
-      http.expectOne({ method: 'GET', url: '/api/gauthCredentialRepository/a%20b%2Fc' }).flush([]);
+      let tous: unknown;
+      let unUtilisateur: unknown;
+      service.getAll().subscribe((value) => (tous = value));
+      http.expectOne({ method: 'GET', url: '/api/gauthCredentialRepository' }).flush([{ username: 'alice' }]);
+      service.getByUsername('a b/c').subscribe((value) => (unUtilisateur = value));
+      http.expectOne({ method: 'GET', url: '/api/gauthCredentialRepository/a%20b%2Fc' }).flush([{ username: 'a b/c' }]);
+      expect(tous).toEqual([{ username: 'alice' }]);
+      expect(unUtilisateur).toEqual([{ username: 'a b/c' }]);
     });
 
     it('supprime les comptes d\'un utilisateur par son identifiant', () => {
-      TestBed.inject(GauthCredentialService).deleteByUsername('alice').subscribe();
+      let termine = false;
+      TestBed.inject(GauthCredentialService).deleteByUsername('alice').subscribe(() => (termine = true));
       http.expectOne({ method: 'DELETE', url: '/api/gauthCredentialRepository/alice' }).flush(null);
+      expect(termine).toBe(true);
     });
   });
 
   describe('TrustedDeviceService', () => {
     it('liste les appareils, tous ou ceux d\'un utilisateur', () => {
       const service = TestBed.inject(TrustedDeviceService);
-      service.getAll().subscribe();
-      http.expectOne({ method: 'GET', url: '/api/multifactorTrustedDevices' }).flush([]);
-      service.getByUsername('alice').subscribe();
-      http.expectOne({ method: 'GET', url: '/api/multifactorTrustedDevices/alice' }).flush([]);
+      let tous: unknown;
+      let unUtilisateur: unknown;
+      service.getAll().subscribe((value) => (tous = value));
+      http.expectOne({ method: 'GET', url: '/api/multifactorTrustedDevices' }).flush([{ principal: 'alice' }, { principal: 'bob' }]);
+      service.getByUsername('alice').subscribe((value) => (unUtilisateur = value));
+      http.expectOne({ method: 'GET', url: '/api/multifactorTrustedDevices/alice' }).flush([{ principal: 'alice' }]);
+      expect(tous).toEqual([{ principal: 'alice' }, { principal: 'bob' }]);
+      expect(unUtilisateur).toEqual([{ principal: 'alice' }]);
     });
 
     it('révoque par recordKey, encodé dans l\'URL (il contient @, espaces et parfois /)', () => {
-      TestBed.inject(TrustedDeviceService).revoke('alice@Poste 13/10/2026@fp').subscribe();
+      let termine = false;
+      TestBed.inject(TrustedDeviceService).revoke('alice@Poste 13/10/2026@fp').subscribe(() => (termine = true));
       http
         .expectOne({ method: 'DELETE', url: '/api/multifactorTrustedDevices/alice%40Poste%2013%2F10%2F2026%40fp' })
         .flush(null);
+      expect(termine).toBe(true);
     });
   });
 
