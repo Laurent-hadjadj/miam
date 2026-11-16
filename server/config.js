@@ -56,7 +56,9 @@ const DEFAULT_CAS_BASE_URL = 'http://localhost:8083/sso';
 
 /** Retire les « / » finaux : les adresses CAS sont toujours suivies d'un chemin qui commence par « / ». */
 function trimTrailingSlashes(url) {
-  return url.replace(/\/+$/, '');
+  let end = url.length;
+  while (end > 0 && url[end - 1] === '/') end--;
+  return url.slice(0, end);
 }
 
 /**

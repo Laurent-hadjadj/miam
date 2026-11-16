@@ -13,6 +13,18 @@ import { Component } from '@angular/core';
 import { APP_AUTHOR, APP_VERSION } from '../core/api-config';
 
 /**
+ * Abrège le prénom en initiale : « Laurent HADJADJ » -> « L. HADJADJ ». Sans espace, ou sans rien après
+ * le premier mot, le nom est renvoyé tel quel. Pas d'expression régulière à retour arrière : la recherche
+ * du premier espace est linéaire quelle que soit la valeur de `APP_AUTHOR` (configurable).
+ */
+export function abbreviateAuthor(name: string): string {
+  const firstSpace = name.search(/\s/);
+  if (firstSpace < 1) return name;
+  const rest = name.slice(firstSpace).trimStart();
+  return rest ? `${name[0]}. ${rest}` : name;
+}
+
+/**
  * Pied de page affiché sur toutes les pages (publiques et authentifiées) : année en cours, auteur,
  * licence et version de l'application.
  *
@@ -31,9 +43,9 @@ export class AppFooter {
   protected readonly author = APP_AUTHOR;
   /**
    * "Laurent HADJADJ" -> "L. HADJADJ" pour le pied de page mobile (une seule ligne). Un nom sans
-   * espace n'est pas abrégé (l'expression ne correspond pas, la valeur reste inchangée).
+   * espace n'est pas abrégé (la valeur reste inchangée).
    */
-  protected readonly authorShort = APP_AUTHOR.replace(/^(\S)\S*\s+(.+)$/, '$1. $2');
+  protected readonly authorShort = abbreviateAuthor(APP_AUTHOR);
   /** Version de l'application, préfixée de « v » dans le gabarit. */
   protected readonly version = APP_VERSION;
   /** Année courante au moment de la création du composant (pas de mise à jour ensuite). */
