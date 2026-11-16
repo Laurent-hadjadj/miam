@@ -34,7 +34,7 @@ _
 ## 1️⃣ Licence
 
 > [!NOTE]
-> 
+>
 > - **Code** : [GNU AGPL 3.0 ou ultérieure](LICENSE) (`AGPL-3.0-or-later`), licence à copyleft : le logiciel reste ouvert, y compris lorsqu'il est proposé comme service web.
 > - **Documentation et images** (`README.md`, dossier `docs/`, logos et images) : [CC BY-SA 4.0](docs/LICENSE.md).
 >

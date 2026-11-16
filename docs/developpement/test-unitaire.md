@@ -4,8 +4,8 @@
 
 | Suite | Fichiers | Tests | Outil | Nature |
 | --- | ---: | ---: | --- | --- |
-| Application Angular (`src/**/*.spec.ts`) | 22 | **133** | Vitest 5 + `TestBed` (jsdom) | Services, garde, composants |
-| Module BFF (`server/test/*.test.js`) | 5 | **53** | `node:test` (intégré à Node) | Routes, session, relais, journal, configuration, point de santé |
+| Application Angular (`src/**/*.spec.ts`) | 22 | **134** | Vitest 5 + `TestBed` (jsdom) | Services, garde, composants |
+| Module BFF (`server/test/*.test.js`) | 5 | **54** | `node:test` (intégré à Node) | Routes, session, relais, journal, configuration, point de santé |
 | Bout en bout (`e2e/`) | 9 | **60** | Playwright | Voir [Tests e2e](test-e2e.md) |
 
 > **Couverture de code**
