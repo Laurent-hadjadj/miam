@@ -64,8 +64,10 @@ describe('AccountAdminService', () => {
   });
 
   it('sans appareil, supprime directement le compte', () => {
-    service.deleteAccountWithDevices('alice', []).subscribe();
+    let done = false;
+    service.deleteAccountWithDevices('alice', []).subscribe(() => (done = true));
     http.expectOne({ method: 'DELETE', url: '/api/gauthCredentialRepository/alice' }).flush(null);
+    expect(done).toBe(true);
   });
 
   it('si une révocation échoue, le compte n\'est PAS supprimé (pas d\'appareil orphelin déguisé)', () => {

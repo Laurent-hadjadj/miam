@@ -321,9 +321,11 @@ describe('UserList', () => {
   describe('suppression d\'un compte TOTP', () => {
     it('ne fait rien si l\'agent annule la confirmation', () => {
       const component = setup({ accounts: [account('alice')] });
-      vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(false));
+      const ask = vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(false));
       component.deleteAccount(account('alice'));
       http.expectNone((r) => r.method === 'DELETE');
+      expect(ask).toHaveBeenCalledTimes(1);
+      expect(snack).not.toHaveBeenCalled();
     });
 
     it('prévient du nombre d\'appareils de confiance qui seront aussi révoqués', () => {
@@ -410,6 +412,7 @@ describe('UserList', () => {
     component.revokeDevice(device('alice'));
     http.expectOne((r) => r.url === '/api/multifactorTrustedDevices/alice%40Poste%40fp' && r.params.get('principal') === 'alice').flush(null);
     flushLoad({});
+    expect(snack).toHaveBeenCalledWith('Appareil "Poste" révoqué.');
   });
 
   it('signale l\'échec de révocation d\'un appareil', () => {
@@ -434,9 +437,11 @@ describe('UserList', () => {
 
   it('annuler la confirmation de révocation ne déclenche aucun appel', () => {
     const component = setup({ devices: [device('alice')], sessions: [ssoSession('alice')] });
-    vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(false));
+    const ask = vi.spyOn(ConfirmService.prototype, 'ask').mockReturnValue(of(false));
     component.revokeDevice(device('alice'));
     component.revokeSession(ssoSession('alice'));
     http.expectNone((r) => r.method === 'DELETE');
+    expect(ask).toHaveBeenCalledTimes(2);
+    expect(snack).not.toHaveBeenCalled();
   });
 });

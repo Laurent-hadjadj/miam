@@ -34,11 +34,11 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class SearchBar {
   /** Émet le contenu actuel du champ à chaque saisie, collage ou effacement (chaîne vide comprise). */
-  readonly search = output<string>();
+  readonly searchChange = output<string>();
 
-  /** Gestionnaire de l'événement `input` du champ : relaie sa valeur via la sortie `search`. */
+  /** Gestionnaire de l'événement `input` du champ : relaie sa valeur via la sortie `searchChange`. */
   onSearch(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.search.emit(value);
+    this.searchChange.emit(value);
   }
 }

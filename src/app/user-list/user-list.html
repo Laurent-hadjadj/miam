@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <app-search-bar (search)="onSearch($event)"></app-search-bar>
+  <app-search-bar (searchChange)="onSearch($event)"></app-search-bar>
 
   <!-- Chargement : spinner décoratif, l'état est porté par le texte réservé aux lecteurs d'écran. -->
   @if (loading()) {
